@@ -1,0 +1,498 @@
+<!DOCTYPE html>
+
+<html lang="en" xmlns:th="http://www.thymeleaf.org"   xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
+      layout:decorate="~{template_ChefDepartement.html}">
+<head>
+    <meta charset="UTF-8">
+    <title>Title</title>
+
+    <meta charset="UTF-8">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@3.4.1/dist/css/bootstrap.min.css">
+    <!-- DataTables CSS -->
+    <!-- CSS DataTables -->
+    <link rel="stylesheet" href="https://cdn.datatables.net/1.13.6/css/jquery.dataTables.min.css">
+    <style>
+        .btn {
+            font-size: 12px;
+        }
+        table {
+            margin-top: 20px;
+        }
+        .dataTables_filter {
+            float: right;
+        }
+        .modal-title {
+            text-align: center;
+        }
+        .btn-custom {
+            background-color: #007bff;
+            color: white;
+            font-size: 14px;
+            padding: 10px 20px;
+            border: none;
+            border-radius: 5px;
+        }
+        .table-container table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 20px;
+            border: 1px solid #ddd;
+        }
+        .table-container th, .table-container td {
+            padding: 12px;
+            text-align: left;
+            vertical-align: middle;
+            border: 1px solid #ddd;
+        }
+        .table-container th {
+            background-color: #007bff;
+            color: white;
+            font-weight: bold;
+            text-align: center;
+        }
+        .table-container td {
+            background-color: #f9f9f9;
+        }
+        .table-container tr:nth-child(even) td {
+            background-color: #f2f2f2;
+        }
+        .table-container tr:hover td {
+            background-color: #e2e2e2;
+        }
+        .jaune {
+            color: #ffcc00;
+            font-weight: bold;
+        }
+        .checkbox-group {
+    display: flex;
+    flex-direction: column;
+    border: 1px solid #ddd; /* Bordure autour du cadre */
+    padding: 10px;
+    border-radius: 5px; /* Coins arrondis */
+    background-color: #f9f9f9; /* Couleur de fond */
+    max-height: 300px; /* Hauteur maximale fixe */
+    overflow-y: auto; /* Affiche une barre de défilement verticale si nécessaire */
+    height:100px;
+}
+
+.checkbox-item {
+    margin-bottom: 10px;
+    display: flex;
+    align-items: center;
+}
+
+.checkbox-item input[type="checkbox"] {
+    margin-right: 10px; /* Espace entre la case et le label */
+}
+
+.checkbox-item label {
+    font-size: 16px;
+    color: #333;
+}
+
+.checkbox-item input[type="checkbox"]:hover {
+    cursor: pointer;
+}
+
+.checkbox-group input[type="checkbox"]:checked + label {
+    font-weight: bold; /* Met en gras l'option sélectionnée */
+    color: #007bff; /* Change la couleur du texte en bleu */
+}
+
+.checkbox-group input[type="checkbox"]:focus {
+    outline: none; /* Supprime le contour bleu sur le focus */
+}
+
+    </style>
+
+</head>
+<body>
+
+<header>
+    <nav class="navbar navbar-inverse">
+        <div class="container-fluid">
+            <div class="collapse navbar-collapse" id="bs-example-navbar-collapse-1">
+                <ul class="nav navbar-nav navbar-left">
+                    <li>
+                        <a><span>Accueil</span></a>
+                    </li>
+                    <li>
+                        <a th:href="@{/Emplois}"><span>Emploi du Temps</span></a>
+                    </li>
+                    <li class="dropdown">
+                        <a href="#" class="dropdown-toggle" data-toggle="dropdown">
+                            <span>Syllabus</span><span class="caret"></span>
+                        </a>
+                        <ul class="dropdown-menu">
+                            <li><a th:href="@{/Maquette}">maquette</a></li>
+                            <li><a th:href="@{/Batiment}">batiment</a></li>
+                            <li><a th:href="@{/Salle}">salle</a></li>
+                        </ul>
+                    </li>
+                    <li>
+                        <a th:href="@{/Choix}"><span>Repartition</span></a>
+                    </li>
+                    <li>
+                        <a th:href="@{/ChefDepartement/Enseignant}"><span>Enseignants</span></a>
+                    </li>
+                    <!-- Ajout de l'élément Maquette avec sous-menus -->
+                    <li class="dropdown">
+                        <a href="#" class="dropdown-toggle" data-toggle="dropdown">
+                            <span>Maquettes</span><span class="caret"></span>
+                        </a>
+                        <ul class="dropdown-menu">
+                            <li><a th:href="@{/Formation}">formation</a></li>
+                            <li><a th:href="@{/Classe}">classe</a></li>
+                            <li><a th:href="@{/EC}">EC</a></li>
+                            <li><a th:href="@{/UE}">UE</a></li>
+                        </ul>
+                    </li>
+                </ul>
+                <ul class="nav navbar-nav navbar-right">
+                    <li class="dropdown">
+                        <a href="#" class="dropdown-toggle" data-toggle="dropdown">
+                            <span th:text="${prenom + '. ' + nom}"></span><span class="caret"></span>
+                        </a>
+                        <ul class="dropdown-menu">
+                            <li>
+                                <a th:href="@{/profil}"><span>Profil</span></a>
+                            </li>
+                            <li>
+                                <a th:href="@{/logout}"><span>Deconnexion</span></a>
+                            </li>
+                        </ul>
+                    </li>
+                </ul>
+            </div><!-- /.navbar-collapse -->
+        </div><!-- /.container-fluid -->
+    </nav>
+</header>
+        <div class="container">
+                <h3 class="text-center">Gestion des Maquettes
+                    <span th:if="${classe != null}" th:text="' pour la Classe ' + ${classe.nom} + '-' + ${classe.niveau} + 'e Année'"></span>
+                </h3>
+
+                <div class="tab-content">
+                    <!-- Liste des Maquettes -->
+                    <div id="listeMaquettes" class="tab-pane fade in active">
+                        <div class="text-left" style="margin-top: 20px; margin-bottom:15px;">
+                            <button class="btn btn-custom" data-toggle="modal" data-target="#ajouterClasseModal">Ajouter une Maquette</button>
+                        </div>
+                        <div class="table-responsive">
+                            <table id="tableClasses" class="table table-bordered table-striped">
+                                <thead>
+                                <tr>
+                                    <th>Nom</th>
+                                    <th>Semestre</th>
+                                    <th>Actions</th>
+                                    <th>Détails</th>
+                                </tr>
+                                </thead>
+                                <tbody>
+                                <tr th:each="maquette : ${maquettes}">
+                                    <td th:text="${maquette.nom}"></td>
+                                    <td th:text="${maquette.semestre}"></td>
+                                    <td>
+                                        <button class="btn btn-info btn-sm" data-toggle="modal" th:attr="data-target='#modifierClasseModal_' + ${maquette.id}">Modifier</button>
+                                        <button class="btn btn-danger btn-sm" data-toggle="modal" th:attr="data-target='#supprimerClasseModal_' + ${maquette.id}">Supprimer</button>
+                                        <button th:if="${maquette.isArchive() == false}" class="btn btn-warning btn-xs" data-toggle="modal" th:attr="data-target='#form_Archiver_Permanent'+${maquette.id}">
+                                            Archiver
+                                        </button>
+                                        <button th:if="${maquette.isArchive() == true}" class="btn btn-primary btn-xs" data-toggle="modal" th:attr="data-target='#form_Archiver_Permanent'+${maquette.id}">
+                                            Desarchiver
+                                        </button>
+                                        <button th:if="${maquette.isActive() == false}" class="btn btn-warning btn-xs" data-toggle="modal" th:attr="data-target='#form_Activer'+${maquette.id}">
+                                            Activer
+                                        </button>
+                                        <button th:if="${maquette.isActive() == true}" class="btn btn-primary btn-xs" data-toggle="modal" th:attr="data-target='#form_Desactiver'+${maquette.id}">
+                                            Désactiver
+                                        </button>
+                                    </td>
+
+                                    <!-- Modal Activer Maquette -->
+                                    <div class="modal fade" th:attr="id='form_Activer'+${maquette.id}" th:if="${maquette.active == false}">
+                                        <div class="modal-dialog">
+                                            <div class="modal-content panel-warning">
+                                                <div class="modal-header panel-heading">
+                                                    <button type="button" class="close" data-dismiss="modal">x</button>
+                                                    <h4 class="modal-title" style="text-align: center">Activer Maquette</h4>
+                                                </div>
+                                                <form th:action="@{/Maquette/activer}" method="post">
+                                                    <div class="modal-body">
+                                                        <div style="display: none">
+                                                            <input name="id" th:value="${maquette.id}" />
+                                                        </div>
+                                                        <div class="form-group">
+                                                            <label>Nom de la Maquette : </label>
+                                                            <span th:text="${maquette.nom}"></span>
+                                                        </div>
+                                                    </div>
+                                                    <div class="modal-footer">
+                                                        <button type="submit" class="btn btn-warning">Activer</button>
+                                                        <button type="button" class="btn btn-default" data-dismiss="modal">Annuler</button>
+                                                    </div>
+                                                </form>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <div class="modal fade" th:attr="id='form_Desactiver'+${maquette.id}" th:if="${maquette.active == true}">
+                                        <div class="modal-dialog">
+                                            <div class="modal-content panel-warning">
+                                                <div class="modal-header panel-heading">
+                                                    <button type="button" class="close" data-dismiss="modal">x</button>
+                                                    <h4 class="modal-title" style="text-align: center">Desactiver Maquette</h4>
+                                                </div>
+                                                <form th:action="@{/Maquette/activer}" method="post">
+                                                    <div class="modal-body">
+                                                        <div style="display: none">
+                                                            <input name="id" th:value="${maquette.id}" />
+                                                        </div>
+                                                        <div class="form-group">
+                                                            <label>Nom de la Maquette : </label>
+                                                            <span th:text="${maquette.nom}"></span>
+                                                        </div>
+                                                    </div>
+                                                    <div class="modal-footer">
+                                                        <button type="submit" class="btn btn-warning">Activer</button>
+                                                        <button type="button" class="btn btn-default" data-dismiss="modal">Annuler</button>
+                                                    </div>
+                                                </form>
+                                            </div>
+                                        </div>
+                                    </div>
+
+                                    <!-- Modal Archiver Maquette -->
+                                    <div class="modal fade" th:attr="id='form_Archiver_Permanent'+${maquette.id}">
+                                        <div class="modal-dialog">
+                                            <div th:if="${maquette.isArchive() == false}" class="modal-content panel-warning">
+                                                <div class="modal-header panel-heading">
+                                                    <button type="button" class="close" data-dismiss="modal">x</button>
+                                                    <h4 class="modal-title" style="text-align: center">Archiver Maquette</h4>
+                                                </div>
+                                                <form th:action="@{/Maquette/archiver}" method="post">
+                                                    <div class="modal-body">
+                                                        <div style="display: none">
+                                                            <input name="id" th:value="${maquette.id}" />
+                                                        </div>
+                                                    </div>
+                                                    <div class="modal-footer">
+                                                        <button type="submit" class="btn btn-warning">Archiver</button>
+                                                        <button type="button" class="btn btn-default" data-dismiss="modal">Annuler</button>
+                                                    </div>
+                                                </form>
+                                            </div>
+
+                                            <div th:if="${maquette.isArchive() == true}" class="modal-content panel-primary">
+                                                <div class="modal-header panel-heading">
+                                                    <button type="button" class="close" data-dismiss="modal">x</button>
+                                                    <h4 class="modal-title" style="text-align: center">Desarchiver Maquette</h4>
+                                                </div>
+                                                <form th:action="@{/Maquette/archiver}" method="post">
+                                                    <div class="modal-body">
+                                                        <div style="display: none">
+                                                            <input name="id" th:value="${maquette.id}" />
+                                                        </div>
+                                                        <div class="form-group">
+                                                            <label>Nom de la Maquette :</label>
+                                                            <span th:text="${maquette.nom}"></span>
+                                                        </div>
+                                                    </div>
+                                                    <div class="modal-footer">
+                                                        <button type="submit" class="btn btn-primary">Desarchiver</button>
+                                                        <button type="button" class="btn btn-default" data-dismiss="modal">Annuler</button>
+                                                    </div>
+                                                </form>
+                                            </div>
+                                        </div>
+                                    </div>
+
+                                    <td style="display: flex; flex-direction: row;">
+                                        <form th:action="@{/Maquette/detail}" method="get">
+                                            <input type="hidden" name="_csrf" value="${_csrf.token}" />
+
+                                            <input type="hidden" name="id" th:value="${maquette.id}">
+                                            <input type="hidden" th:name="${_csrf.parameterName}" th:value="${_csrf.token}">
+                                            <input type="submit" value="Voir" class="btn btn-primary btn-sm">
+                                        </form>
+                                        <form th:action="@{/Maquette/afficher}" method="post">
+                                            <input type="hidden" name="id" th:value="${maquette.id}">
+                                            <input type="submit" value="Afficher" class="btn btn-primary btn-sm" style="background: orange;">
+                                        </form>
+                                    </td>
+
+                                    <!-- Modal Modifier Maquette -->
+                                    <div th:id="'modifierClasseModal_' + ${maquette.id}" class="modal fade" tabindex="-1" role="dialog" aria-labelledby="modifierClasseModalLabel" aria-hidden="true">
+                                        <div class="modal-dialog" role="document">
+                                            <div class="modal-content">
+                                                <div class="modal-header">
+                                                    <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                                                        <span aria-hidden="true">&times;</span>
+                                                    </button>
+                                                    <h5 class="modal-title" id="modifierClasseModalLabel">Modifier Maquette</h5>
+                                                </div>
+                                                <div class="modal-body">
+                                                    <!-- Formulaire de modification de maquette -->
+                                                    <form th:action="@{/Maquette/modifierMaquette}" method="post">
+                                                        <input type="hidden" name="id" th:value="${maquette.id}">
+                                                        <div class="form-group">
+                                                            <label for="nom1">Nom de la Maquette</label>
+                                                            <input type="text" class="form-control" name="nom" id="nom1" th:value="${maquette.nom}">
+                                                        </div>
+                                                        <div class="form-group">
+                                                            <label for="semestre1">Semestre</label>
+                                                            <select id="semestre1" name="semestre" class="form-control">
+                                                                <option value="1">1</option>
+                                                                <option value="2">2</option>
+                                                                <option value="3">3</option>
+                                                                <option value="4">4</option>
+                                                                <option value="5">5</option>
+                                                                <option value="6">6</option>
+                                                            </select>
+                                                            <div class="form-group">
+                                                                <label for="ue">UE</label>
+                                                                <div class="checkbox-group">
+                                                                    <!-- Boucle sur la liste ues -->
+                                                                    <div th:each="ue : ${ues}" class="checkbox-item">
+                                                                        <input type="checkbox"
+                                                                               th:id="'ue_' + ${ue.id}"
+                                                                               name="idUEs"
+                                                                               th:value="${ue.id}">
+                                                                        <label th:for="'ue_' + ${ue.id}" th:text="${ue.intitule}"></label>
+                                                                    </div>
+                                                                </div>
+                                                            </div>
+
+                                                        </div>
+                                                        <div class="modal-footer">
+                                                            <button type="submit" class="btn btn-primary">Modifier</button>
+                                                            <button type="button" class="btn btn-secondary" data-dismiss="modal">Annuler</button>
+                                                        </div>
+                                                    </form>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <!-- Modal Supprimer Maquette -->
+
+                                    <div th:id="'supprimerClasseModal_' + ${maquette.id}" class="modal fade" tabindex="-1" role="dialog" aria-labelledby="supprimerClasseModalLabel" aria-hidden="true">
+                                        <div class="modal-dialog" role="document">
+                                            <div class="modal-content">
+                                                <div class="modal-header">
+                                                    <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                                                        <span aria-hidden="true">&times;</span>
+                                                    </button>
+                                                    <h5 class="modal-title" id="supprimerClasseModalLabel">Supprimer Maquette</h5>
+                                                </div>
+                                                <div class="modal-body">
+                                                    <p>Êtes-vous sûr de vouloir supprimer cette maquette ?</p>
+                                                </div>
+                                                <div class="modal-footer">
+                                                    <form th:action="@{/Maquette/supprimerMaquette}" method="post">
+                                                        <input type="hidden" name="id" th:value="${maquette.id}">
+                                                        <button type="submit" class="btn btn-danger">Supprimer</button>
+                                                        <button type="button" class="btn btn-secondary" data-dismiss="modal">Annuler</button>
+                                                    </form>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </tr>
+                                </tbody>
+                            </table>
+                        </div>
+                        <div id="ajouterClasseModal" class="modal fade" tabindex="-1" role="dialog" aria-labelledby="ajouterClasseModalLabel" aria-hidden="true">
+                            <div class="modal-dialog" role="document">
+                                <div class="modal-content">
+                                    <div class="modal-header">
+                                        <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                                            <span aria-hidden="true">&times;</span>
+                                        </button>
+                                        <h5 class="modal-title" id="ajouterClasseModalLabel">Ajouter une Maquette</h5>
+                                    </div>
+                                    <div class="modal-body">
+                                        <!-- Formulaire d'ajout de maquette -->
+                                        <form th:action="@{/Maquette/ajouterMaquette}" method="post">
+                                            <div class="form-group">
+                                                <label for="classe">Classe</label>
+                                                <select id="classe" name="classe" class="form-control" >
+                                                    <option th:each="classe : ${classes}" th:value="${classe.id}" th:text="${classe.formation.intitule+'-'+classe.niveau}"></option>
+                                                </select>
+                                            </div>
+
+                                            <div class="form-group">
+                                                <label for="ue">UE</label>
+                                                <div class="checkbox-group">
+                                                    <!-- Boucle sur la liste ues -->
+                                                    <div th:each="ue : ${ues}" class="checkbox-item">
+                                                        <input type="checkbox"
+                                                               th:id="'ue_' + ${ue.id}"
+                                                               name="idUEs"
+                                                               th:value="${ue.id}">
+                                                        <label th:for="'ue_' + ${ue.id}" th:text="${ue.intitule}"></label>
+                                                    </div>
+                                                </div>
+                                            </div>
+
+
+                                            <div class="form-group">
+                                                <label for="semestre">Semestre</label>
+                                                <select id="semestre" name="semestre" class="form-control">
+                                                    <option value="1">1</option>
+                                                    <option value="2">2</option>
+                                                    <option value="3">3</option>
+                                                    <option value="4">4</option>
+                                                    <option value="5">5</option>
+                                                    <option value="6">6</option>
+                                                </select>
+                                            </div>
+
+                                            <div class="modal-footer">
+                                                <button type="submit" class="btn btn-primary">Ajouter</button>
+                                                <button type="button" class="btn btn-secondary" data-dismiss="modal">Annuler</button>
+                                            </div>
+                                        </form>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+
+            </div>
+
+
+        </div>
+        <!-- jQuery -->
+        <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+        <!-- Bootstrap JS -->
+        <script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/js/bootstrap.min.js"></script>
+<script src="https://cdn.datatables.net/1.13.6/js/jquery.dataTables.min.js"></script>
+<script>
+    $(document).ready(function() {
+    $('#tableClasses').DataTable({
+        language: {
+            search: "Rechercher :",
+            lengthMenu: "Afficher _MENU_ entrées",
+            zeroRecords: "Aucune maquette trouvée",
+            info: "Affichage de _START_ à _END_ sur _TOTAL_ entrées",
+            infoEmpty: "Aucune entrée disponible",
+            infoFiltered: "(filtré à partir de _MAX_ entrées totales)"
+        },
+        paging: true, // Activer la pagination
+        searching: true, // Activer la recherche
+        ordering: true, // Activer le tri des colonnes
+        responsive: true // Rendre le tableau réactif
+    });
+});
+
+</script>
+
+
+
+
+
+
+
+</body>
+</html>

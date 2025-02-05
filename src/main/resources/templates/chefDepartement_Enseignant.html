@@ -1,0 +1,978 @@
+<!DOCTYPE html>
+
+<html lang="en" xmlns:th="http://www.thymeleaf.org"   xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
+      layout:decorate="~{template_ChefDepartement.html}">
+    <head>
+        <meta charset="UTF-8">
+        <title>Title</title>
+
+        <meta charset="UTF-8">
+        <link  rel="stylesheet" href="../static/css/bootstrap.css" th:href="@{/css/bootstrap.css}"/>
+        <link  rel="stylesheet" href="../static/css/buttons.dataTables.min.css" th:href="@{/css/buttons.dataTables.min.css}"/>
+        <link  rel="stylesheet" href="../static/css/jquery.dataTables.min.css" th:href="@{/css/jquery.dataTables.min.css}"/>
+
+        <script src="../static/js/jquery-3.7.0.js" th:src="@{/js/jquery-3.7.0.js}"></script>
+        <script src="../static/js/bootstrap.js" th:src="@{/js/bootstrap.js}"></script>
+        <script src="../static/js/dataTables.buttons.min.js" th:src="@{/js/dataTables.buttons.min.js}"></script>
+        <script src="../static/js/jquery.dataTables.min.js" th:src="@{/js/jquery.dataTables.min.js}"></script>
+
+    </head>
+<body>
+
+<header>
+    <nav class="navbar navbar-inverse">
+        <div class="container-fluid">
+            <div class="collapse navbar-collapse" id="bs-example-navbar-collapse-1">
+                <ul class="nav navbar-nav navbar-left">
+                    <li>
+                        <a><span>Accueil</span></a>
+                    </li>
+                    <li>
+                        <a th:href="@{/Emplois}"><span>Emploi du Temps</span></a>
+                    </li>
+                    <li class="dropdown">
+                        <a href="#" class="dropdown-toggle" data-toggle="dropdown">
+                            <span>Syllabus</span><span class="caret"></span>
+                        </a>
+                        <ul class="dropdown-menu">
+                            <li><a th:href="@{/Maquette}">maquette</a></li>
+                            <li><a th:href="@{/Batiment}">batiment</a></li>
+                            <li><a th:href="@{/Salle}">salle</a></li>
+                        </ul>
+                    </li>
+                    <li>
+                        <a th:href="@{/Choix}"><span>Repartition</span></a>
+                    </li>
+                    <li>
+                        <a th:href="@{/ChefDepartement/Enseignant}"><span>Enseignants</span></a>
+                    </li>
+                    <!-- Ajout de l'élément Maquette avec sous-menus -->
+                    <li class="dropdown">
+                        <a href="#" class="dropdown-toggle" data-toggle="dropdown">
+                            <span>Maquettes</span><span class="caret"></span>
+                        </a>
+                        <ul class="dropdown-menu">
+                            <li><a th:href="@{/Formation}">formation</a></li>
+                            <li><a th:href="@{/Classe}">classe</a></li>
+                            <li><a th:href="@{/EC}">EC</a></li>
+                            <li><a th:href="@{/UE}">UE</a></li>
+                        </ul>
+                    </li>
+                </ul>
+                <ul class="nav navbar-nav navbar-right">
+                    <li class="dropdown">
+                        <a href="#" class="dropdown-toggle" data-toggle="dropdown">
+                            <span th:text="${prenom + '. ' + nom}"></span><span class="caret"></span>
+                        </a>
+                        <ul class="dropdown-menu">
+                            <li>
+                                <a th:href="@{/profil}"><span>Profil</span></a>
+                            </li>
+                            <li>
+                                <a th:href="@{/logout}"><span>Deconnexion</span></a>
+                            </li>
+                        </ul>
+                    </li>
+                </ul>
+            </div><!-- /.navbar-collapse -->
+        </div><!-- /.container-fluid -->
+    </nav>
+</header>
+
+<div layout:fragment="custom-content" class="container">
+
+    <br/>
+    <h3 style="text-align: center">La liste des Enseignants</h3>
+
+    <ul class="nav nav-tabs">
+        <li class="active"><a data-toggle="tab" href="#tab_Permanent">La liste des Permanents</a></li>
+        <li><a data-toggle="tab" href="#tab_Vacataire">La liste des Vacataires</a></li>
+    </ul>
+
+    <div class="tab-content">
+
+        <div id="tab_Permanent" class="tab-pane fade in active">
+
+            <div class="row" style="padding-bottom: 10px; padding-top: 10px">
+                <div style="text-align: center">
+                    <button type="button" class="btn btn-success" data-toggle="modal" data-target="#form_Ajouter_Permanent" >Ajouter Permanent</button>
+                </div>
+            </div>
+
+            <!-- Debut popup ajouter un Permanent -->
+            <div data-dismiss="modal" style="margin-top:25px">
+                <div class="modal fade" id="form_Ajouter_Permanent">
+                    <div class="modal-dialog" >
+                        <div class="modal-content panel-success" >
+                            <!--modal Header-->
+                            <div class="modal-header panel-heading" >
+                                <button type="button" class="close" data-dismiss="modal">x</button>
+                                <h4 class="modal-title" style="text-align: center">Ajouter un Permanent</h4>
+                            </div>
+                            <!--modal Body-->
+                            <form th:action="@{/ChefDepartement/ajouterPermanent}" method="post">
+                                <div class="modal-body" >
+                                    <div class="form-group">
+                                        <label >Matricule</label>
+                                        <input type="text" class="form-control" name="matricule" />
+                                    </div>
+                                    <div class="form-group">
+                                        <label >Nom</label>
+                                        <input type="text" class="form-control" name="nom" />
+                                    </div>
+                                    <div class="form-group">
+                                        <label >Prenom(s)</label>
+                                        <input type="text" class="form-control" name="prenom"/>
+                                    </div>
+                                    <div class="form-group">
+                                        <label >Specialite</label>
+                                        <input type="text" class="form-control" name="specialite"/>
+                                    </div>
+                                    <div class="form-group">
+                                        <label >Grade</label>
+                                        <input type="text" class="form-control" name="grade" />
+                                    </div>
+                                    <div class="form-group">
+                                        <label >login</label>
+                                        <input type="text" class="form-control" name="username"/>
+                                    </div>
+                                </div>
+                                <!--modal Footer-->
+                                <div class="modal-footer" >
+                                    <div class="row">
+                                        <div class="col-lg-3  col-md-3 col-sm-3 col-xs-4">
+                                            <button type="submit" class="btn btn-success">Ajouter</button>
+                                        </div>
+                                        <div class="col-lg-offset-5 col-lg-3 col-md-offset-5 col-md-3 col-sm-offset-5 col-sm-3 col-xs-8">
+                                            <button type="submit" class="btn btn-default " data-dismiss="modal">Annuler</button>
+                                        </div>
+                                    </div>
+                                </div>
+                            </form>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <!-- Fin popup ajouter un Permanent -->
+
+            <!-- Debut lister tout les Permanents -->
+            <div class="table-responsive">
+                <table class="table table-bordered table-striped" id="table_Permanent">
+                    <thead>
+                    <tr>
+                        <th>Matricule</th>
+                        <th>Nom</th>
+                        <th>Prenom(s)</th>
+                        <th>Specialite</th>
+                        <th>Grade</th>
+                        <th>Login</th>
+                        <th>Operations</th>
+                    </tr>
+                    </thead>
+                    <tbody>
+                    <tr th:each="permanent:${permanents}">
+                        <td th:text="${permanent.matricule}"></td>
+                        <td th:text="${permanent.nom}"></td>
+                        <td th:text="${permanent.prenom}"></td>
+                        <td th:text="${permanent.specialite}"></td>
+                        <td th:text="${permanent.grade}"></td>
+                        <td th:text="${permanent.username}"></td>
+                        <td>
+                            <button class="btn btn-info btn-xs" data-toggle="modal" th:attr="data-target='#form_Modifier_Permanent'+${permanent.id}" >
+                                Modifier
+                            </button>
+                            <button th:if="${permanent.isActive()} == false" class="btn btn-success btn-xs" data-toggle="modal" th:attr="data-target='#form_Activer_Permanent'+${permanent.id}">
+                                Activer
+                            </button>
+                            <button th:if="${permanent.isActive()} == true" class="btn btn-danger btn-xs" data-toggle="modal" th:attr="data-target='#form_Activer_Permanent'+${permanent.id}">
+                                Desactiver
+                            </button>
+                            <button th:if="${permanent.isArchive()} == false" class="btn btn-warning btn-xs" data-toggle="modal" th:attr="data-target='#form_Archiver_Permanent'+${permanent.id}">
+                                Archiver
+                            </button>
+                            <button th:if="${permanent.isArchive()} == true" class="btn btn-primary btn-xs" data-toggle="modal" th:attr="data-target='#form_Archiver_Permanent'+${permanent.id}">
+                                Desarchiver
+                            </button>
+                            <button class="btn btn-primary btn-xs" data-toggle="modal" th:attr="data-target='#form_Choix_Permanent' + ${permanent.id}">
+                                Choix
+                            </button>
+                        </td>
+
+                        <div class="modal fade" id="form_Choix_Permanent" th:id="'form_Choix_Permanent' + ${permanent.id}" tabindex="-1" role="dialog" aria-labelledby="exampleModalLabel" aria-hidden="true">
+                            <div class="modal-dialog" role="document">
+                                <div class="modal-content">
+                                    <div class="modal-header">
+                                        <h5 class="modal-title" id="exampleModalLabel">Faire un Choix</h5>
+                                        <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                                            <span aria-hidden="true">&times;</span>
+                                        </button>
+                                    </div>
+                                    <div class="modal-body">
+                                        <form th:action="@{/Choix/ajouterPermanentChoix}" method="post">
+                                            <input type="hidden" name="id" th:value="${permanent.id}">
+
+                                            <!-- Choix enseignement -->
+                                            <div class="form-group">
+                                                <label for="enseignement">Enseignement</label>
+                                                <select name="idEnseignement" id="enseignement" class="form-control" required>
+                                                    <option th:each="enseignement : ${enseignements}"
+                                                            th:value="${enseignement.id}"
+                                                            th:text="${enseignement.ec.intitule + '('+ enseignement.maquette.classe.formation.intitule+'-'+enseignement.maquette.classe.niveau+')'}">
+                                                    </option>
+                                                </select>
+                                            </div>
+
+                                            <!-- Choix type (CM, TD, TP) -->
+                                            <div class="form-group">
+                                                <label>Types</label>
+                                                <div>
+                                                    <!-- Checkbox pour CM -->
+                                                    <div class="form-check">
+                                                        <input class="form-check-input" type="checkbox" name="types" id="type-cm" value="CM">
+                                                        <label class="form-check-label" for="type-cm">
+                                                            CM (Cours Magistral)
+                                                        </label>
+                                                    </div>
+
+                                                    <!-- Checkbox pour TD -->
+                                                    <div class="form-check">
+                                                        <input class="form-check-input" type="checkbox" name="types" id="type-td" value="TD">
+                                                        <label class="form-check-label" for="type-td">
+                                                            TD (Travaux Dirigés)
+                                                        </label>
+                                                    </div>
+
+                                                    <!-- Checkbox pour TP -->
+                                                    <div class="form-check">
+                                                        <input class="form-check-input" type="checkbox" name="types" id="type-tp" value="TP">
+                                                        <label class="form-check-label" for="type-tp">
+                                                            TP (Travaux Pratiques)
+                                                        </label>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                            <button type="submit" class="btn btn-primary">Enregistrer le Choix</button>
+                                        </form>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Debut popup modifier un Permanent -->
+                        <div data-dismiss="modal">
+                            <div class="modal fade" th:attr="id='form_Modifier_Permanent'+${permanent.id}" >
+                                <div class="modal-dialog" >
+                                    <div class="modal-content panel-info" >
+                                        <!--modal Header-->
+                                        <div class="modal-header panel-heading" >
+                                            <button type="button" class="close" data-dismiss="modal">x</button>
+                                            <h4 class="modal-title" style="text-align: center">Modifier Permanent</h4>
+                                        </div>
+                                        <!--modal Body-->
+                                        <form th:action="@{/ChefDepartement/modifierPermanent}" method="post">
+                                            <div class="modal-body" >
+                                                <div style="display: none">
+                                                    <input name="id" th:value="${permanent.id}" />
+                                                </div>
+                                                <div class="form-group">
+                                                    <label >Matricule</label>
+                                                    <input type="text" class="form-control" name="matricule" th:value="${permanent.matricule}"/>
+                                                </div>
+                                                <div class="form-group">
+                                                    <label >Nom</label>
+                                                    <input type="text" class="form-control" name="nom" th:value="${permanent.nom}"/>
+                                                </div>
+                                                <div class="form-group">
+                                                    <label >Prenom(s)</label>
+                                                    <input type="text" class="form-control" name="prenom" th:value="${permanent.prenom}"/>
+                                                </div>
+                                                <div class="form-group">
+                                                    <label >Specialite</label>
+                                                    <input type="text" class="form-control" name="specialite" th:value="${permanent.specialite}"/>
+                                                </div>
+                                                <div class="form-group">
+                                                    <label >Grade</label>
+                                                    <input type="text" class="form-control" name="grade" th:value="${permanent.grade}"/>
+                                                </div>
+                                            </div>
+                                            <!--modal Footer-->
+                                            <div class="modal-footer" >
+                                                <div class="row">
+                                                    <div class="col-lg-3  col-md-3 col-sm-3 col-xs-4">
+                                                        <button type="submit" class="btn btn-info" >Modifier</button>
+                                                    </div>
+                                                    <div class="col-lg-offset-5 col-lg-3 col-md-offset-5 col-md-3 col-sm-offset-5 col-sm-3 col-xs-8">
+                                                        <button type="button" class="btn btn-default " data-dismiss="modal">Annuler</button>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </form>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        <!-- Fin popup modifier un Permanent -->
+
+                        <!-- Debut popup Activer un Permanent -->
+                        <div data-dismiss="modal">
+                            <div class="modal fade" th:attr="id='form_Activer_Permanent'+${permanent.id}">
+                                <div class="modal-dialog" >
+
+                                    <div th:if="${permanent.isActive()} == false" class="modal-content panel-success" >
+                                        <!--modal Header-->
+                                        <div class="modal-header panel-heading" >
+                                            <button type="button" class="close" data-dismiss="modal">x</button>
+                                            <h4 class="modal-title" style="text-align: center">Activer Permanent</h4>
+                                        </div>
+                                        <!--modal Body-->
+                                        <form th:action="@{/ChefDepartement/activerPermanent}" method="post">
+                                            <div class="modal-body" >
+                                                <div style="display: none">
+                                                    <input name="id" th:value="${permanent.id}" />
+                                                </div>
+                                                <div class="form-group">
+                                                    <label >Matricule</label> :
+                                                    <span th:text="${permanent.matricule}"/> </span>
+                                                </div>
+                                                <div class="form-group">
+                                                    <label >Nom</label> :
+                                                    <span th:text="${permanent.nom}"/> </span>
+                                                </div>
+                                                <div class="form-group">
+                                                    <label >Prenom(s)</label> :
+                                                    <span th:text="${permanent.prenom}"/> </span>
+                                                </div>
+                                                <div class="form-group">
+                                                    <label >Specialite</label> :
+                                                    <span th:text="${permanent.specialite}"/> </span>
+                                                </div>
+                                                <div class="form-group">
+                                                    <label >Grade</label> :
+                                                    <span th:text="${permanent.grade}"/> </span>
+                                                </div>
+                                            </div>
+                                            <!--modal Footer-->
+                                            <div class="modal-footer" >
+                                                <div class="row">
+                                                    <div class="col-lg-3  col-md-3 col-sm-3 col-xs-4">
+                                                        <button type="submit" class="btn btn-success">Activer</button>
+                                                    </div>
+                                                    <div class="col-lg-offset-5 col-lg-3 col-md-offset-5 col-md-3 col-sm-offset-5 col-sm-3 col-xs-8">
+                                                        <button type="button" class="btn btn-default " data-dismiss="modal">Annuler</button>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </form>
+                                    </div>
+
+                                    <div th:if="${permanent.isActive()} == true" class="modal-content panel-danger" >
+                                        <!--modal Header-->
+                                        <div class="modal-header panel-heading" >
+                                            <button type="button" class="close" data-dismiss="modal">x</button>
+                                            <h4 class="modal-title" style="text-align: center">Desactiver Permanent</h4>
+                                        </div>
+                                        <!--modal Body-->
+                                        <form th:action="@{/ChefDepartement/activerPermanent}" method="post">
+                                            <div class="modal-body" >
+                                                <div style="display: none">
+                                                    <input name="id" th:value="${permanent.id}" />
+                                                </div>
+                                                <div class="form-group">
+                                                    <label >Matricule</label> :
+                                                    <span th:text="${permanent.matricule}"/> </span>
+                                                </div>
+                                                <div class="form-group">
+                                                    <label >Nom</label> :
+                                                    <span th:text="${permanent.nom}"/> </span>
+                                                </div>
+                                                <div class="form-group">
+                                                    <label >Prenom(s)</label> :
+                                                    <span th:text="${permanent.prenom}"/> </span>
+                                                </div>
+                                                <div class="form-group">
+                                                    <label >Specialite</label> :
+                                                    <span th:text="${permanent.specialite}"/> </span>
+                                                </div>
+                                                <div class="form-group">
+                                                    <label >Grade</label> :
+                                                    <span th:text="${permanent.grade}"/> </span>
+                                                </div>
+                                            </div>
+                                            <!--modal Footer-->
+                                            <div class="modal-footer" >
+                                                <div class="row">
+                                                    <div class="col-lg-3  col-md-3 col-sm-3 col-xs-4">
+                                                        <button type="submit" class="btn btn-danger">Desactiver</button>
+                                                    </div>
+                                                    <div class="col-lg-offset-5 col-lg-3 col-md-offset-5 col-md-3 col-sm-offset-5 col-sm-3 col-xs-8">
+                                                        <button type="button" class="btn btn-default " data-dismiss="modal">Annuler</button>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </form>
+                                    </div>
+
+                                </div>
+                            </div>
+                        </div>
+                        <!-- Fin popup Activer un Permanent -->
+
+                        <!-- Debut popup Archiver un Permanent -->
+                        <div data-dismiss="modal">
+                            <div class="modal fade" th:attr="id='form_Archiver_Permanent'+${permanent.id}">
+                                <div class="modal-dialog" >
+
+                                    <div th:if="${permanent.isArchive()} == false" class="modal-content panel-warning" >
+                                        <!--modal Header-->
+                                        <div class="modal-header panel-heading" >
+                                            <button type="button" class="close" data-dismiss="modal">x</button>
+                                            <h4 class="modal-title" style="text-align: center">Archiver Permanent</h4>
+                                        </div>
+                                        <!--modal Body-->
+                                        <form th:action="@{/ChefDepartement/archiverPermanent}" method="post">
+                                            <div class="modal-body" >
+                                                <div style="display: none">
+                                                    <input name="id" th:value="${permanent.id}" />
+                                                </div>
+                                                <div class="form-group">
+                                                    <label >Matricule</label> :
+                                                    <span th:text="${permanent.matricule}"/> </span>
+                                                </div>
+                                                <div class="form-group">
+                                                    <label >Nom</label> :
+                                                    <span th:text="${permanent.nom}"/> </span>
+                                                </div>
+                                                <div class="form-group">
+                                                    <label >Prenom(s)</label> :
+                                                    <span th:text="${permanent.prenom}"/> </span>
+                                                </div>
+                                                <div class="form-group">
+                                                    <label >Specialite</label> :
+                                                    <span th:text="${permanent.specialite}"/> </span>
+                                                </div>
+                                                <div class="form-group">
+                                                    <label >Grade</label> :
+                                                    <span th:text="${permanent.grade}"/> </span>
+                                                </div>
+                                            </div>
+                                            <!--modal Footer-->
+                                            <div class="modal-footer" >
+                                                <div class="row">
+                                                    <div class="col-lg-3  col-md-3 col-sm-3 col-xs-4">
+                                                        <button type="submit" class="btn btn-warning">Archiver</button>
+                                                    </div>
+                                                    <div class="col-lg-offset-5 col-lg-3 col-md-offset-5 col-md-3 col-sm-offset-5 col-sm-3 col-xs-8">
+                                                        <button type="button" class="btn btn-default " data-dismiss="modal">Annuler</button>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </form>
+                                    </div>
+
+                                    <div th:if="${permanent.isArchive()} == true" class="modal-content panel-primary" >
+                                        <!--modal Header-->
+                                        <div class="modal-header panel-heading" >
+                                            <button type="button" class="close" data-dismiss="modal">x</button>
+                                            <h4 class="modal-title" style="text-align: center">Desarchiver Permanent</h4>
+                                        </div>
+                                        <!--modal Body-->
+                                        <form th:action="@{/ChefDepartement/archiverPermanent}" method="post">
+                                            <div class="modal-body" >
+                                                <div style="display: none">
+                                                    <input name="id" th:value="${permanent.id}" />
+                                                </div>
+                                                <div class="form-group">
+                                                    <label >Matricule</label> :
+                                                    <span th:text="${permanent.matricule}"/> </span>
+                                                </div>
+                                                <div class="form-group">
+                                                    <label >Nom</label> :
+                                                    <span th:text="${permanent.nom}"/> </span>
+                                                </div>
+                                                <div class="form-group">
+                                                    <label >Prenom(s)</label> :
+                                                    <span th:text="${permanent.prenom}"/> </span>
+                                                </div>
+                                                <div class="form-group">
+                                                    <label >Specialite</label> :
+                                                    <span th:text="${permanent.specialite}"/> </span>
+                                                </div>
+                                                <div class="form-group">
+                                                    <label >Grade</label> :
+                                                    <span th:text="${permanent.grade}"/> </span>
+                                                </div>
+                                            </div>
+                                            <!--modal Footer-->
+                                            <div class="modal-footer" >
+                                                <div class="row">
+                                                    <div class="col-lg-3  col-md-3 col-sm-3 col-xs-4">
+                                                        <button type="submit" class="btn btn-primary">desarchiver</button>
+                                                    </div>
+                                                    <div class="col-lg-offset-5 col-lg-3 col-md-offset-5 col-md-3 col-sm-offset-5 col-sm-3 col-xs-8">
+                                                        <button type="button" class="btn btn-default " data-dismiss="modal">Annuler</button>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </form>
+                                    </div>
+
+                                </div>
+                            </div>
+                        </div>
+                        <!-- Fin popup Archiver un Permanent -->
+
+                    </tr>
+                    </tbody>
+                </table>
+            </div>
+            <!-- Fin lister tout les Permanents -->
+
+            <!-- Debut Datatable lister Permanents -->
+            <script>
+            $(document).ready(function() {
+                $("#table_Permanent").DataTable({
+
+                });
+            })
+        </script>
+            <!-- Fin Datatable lister Permanents -->
+
+        </div>
+
+        <div id="tab_Vacataire" class="tab-pane fade">
+
+            <div class="row" style="padding-bottom: 10px; padding-top: 10px">
+                <div style="text-align: center">
+                    <button type="button" class="btn btn-success" data-toggle="modal" data-target="#form_Ajouter_Vacataire" >Ajouter Vacataire</button>
+                </div>
+            </div>
+
+            <!-- Debut popup ajouter un Vacataire -->
+            <div data-dismiss="modal" style="margin-top:25px">
+                <div class="modal fade" id="form_Ajouter_Vacataire">
+                    <div class="modal-dialog" >
+                        <div class="modal-content panel-success" >
+                            <!--modal Header-->
+                            <div class="modal-header panel-heading" >
+                                <button type="button" class="close" data-dismiss="modal">x</button>
+                                <h4 class="modal-title" style="text-align: center">Ajouter un Permanent</h4>
+                            </div>
+                            <!--modal Body-->
+                            <form th:action="@{/ChefDepartement/ajouterVacataire}" method="post">
+                                <div class="modal-body" >
+                                    <div class="form-group">
+                                        <label >Nom</label>
+                                        <input type="text" class="form-control" name="nom" />
+                                    </div>
+                                    <div class="form-group">
+                                        <label >Prenom(s)</label>
+                                        <input type="text" class="form-control" name="prenom"/>
+                                    </div>
+                                    <div class="form-group">
+                                        <label >Specialite</label>
+                                        <input type="text" class="form-control" name="specialite"/>
+                                    </div>
+                                    <div class="form-group">
+                                        <label >Niveau</label>
+                                        <input type="text" class="form-control" name="niveau" />
+                                    </div>
+                                    <div class="form-group">
+                                        <label >login</label>
+                                        <input type="text" class="form-control" name="username"/>
+                                    </div>
+                                </div>
+                                <!--modal Footer-->
+                                <div class="modal-footer" >
+                                    <div class="row">
+                                        <div class="col-lg-3  col-md-3 col-sm-3 col-xs-4">
+                                            <button type="submit" class="btn btn-success">Ajouter</button>
+                                        </div>
+                                        <div class="col-lg-offset-5 col-lg-3 col-md-offset-5 col-md-3 col-sm-offset-5 col-sm-3 col-xs-8">
+                                            <button type="submit" class="btn btn-default " data-dismiss="modal">Annuler</button>
+                                        </div>
+                                    </div>
+                                </div>
+                            </form>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <!-- Fin popup ajouter un Vacataire -->
+
+            <!-- Debut lister tout les Vacataires -->
+            <div class="table-responsive">
+                <table class="table table-bordered table-striped" id="table_Vacataire">
+                    <thead>
+                    <tr>
+                        <th>Nom</th>
+                        <th>Prenom(s)</th>
+                        <th>Specialite</th>
+                        <th>Niveau</th>
+                        <th>Login</th>
+                        <th>Operations</th>
+                    </tr>
+                    </thead>
+                    <tbody>
+                    <tr th:each="vacataire:${vacataires}">
+                        <td th:text="${vacataire.nom}"></td>
+                        <td th:text="${vacataire.prenom}"></td>
+                        <td th:text="${vacataire.specialite}"></td>
+                        <td th:text="${vacataire.niveau}"></td>
+                        <td th:text="${vacataire.username}"></td>
+                        <td>
+                            <button class="btn btn-info btn-xs" data-toggle="modal" th:attr="data-target='#form_Modifier_Vacataire'+${vacataire.id}" >
+                                Modifier
+                            </button>
+                            <button th:if="${vacataire.isActive()} == false" class="btn btn-success btn-xs" data-toggle="modal" th:attr="data-target='#form_Activer_Vacataire'+${vacataire.id}">
+                                Activer
+                            </button>
+                            <button th:if="${vacataire.isActive()} == true" class="btn btn-danger btn-xs" data-toggle="modal" th:attr="data-target='#form_Activer_Vacataire'+${vacataire.id}">
+                                Desactiver
+                            </button>
+                            <button th:if="${vacataire.isArchive()} == false" class="btn btn-warning btn-xs" data-toggle="modal" th:attr="data-target='#form_Archiver_Vacataire'+${vacataire.id}">
+                                Archiver
+                            </button>
+                            <button th:if="${vacataire.isArchive()} == true" class="btn btn-primary btn-xs" data-toggle="modal" th:attr="data-target='#form_Archiver_Vacataire'+${vacataire.id}">
+                                Desarchiver
+                            </button>
+                            <button class="btn btn-primary btn-xs" data-toggle="modal" th:attr="data-target='#form_Choix_Vacataire' + ${vacataire.id}">
+                                Choix
+                            </button>
+                        </td>
+                        <div class="modal fade" id="form_Choix_Vacataire" th:id="'form_Choix_Vacataire' + ${vacataire.id}" tabindex="-1" role="dialog" aria-labelledby="exampleModalLabel" aria-hidden="true">
+                            <div class="modal-dialog" role="document">
+                                <div class="modal-content">
+                                    <div class="modal-header">
+                                        <h5 class="modal-title" id="exampleModalLabel1">Faire un Choix</h5>
+                                        <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                                            <span aria-hidden="true">&times;</span>
+                                        </button>
+                                    </div>
+                                    <div class="modal-body">
+                                        <form th:action="@{/Choix/ajouterPermanentChoix}" method="post">
+                                            <input type="hidden" name="id" th:value="${vacataire.id}">
+
+                                            <!-- Choix enseignement -->
+                                            <div class="form-group">
+                                                <label for="enseignement">Enseignement</label>
+                                                <select name="idEnseignement" id="enseignement1" class="form-control" required>
+                                                    <option th:each="enseignement : ${enseignements}"
+                                                            th:value="${enseignement.id}"
+                                                            th:text="${enseignement.ec.intitule + '('+ enseignement.maquette.classe.formation.intitule+'-'+enseignement.maquette.classe.niveau+')'}">
+                                                    </option>
+                                                </select>
+                                            </div>
+
+                                            <!-- Choix type (CM, TD, TP) -->
+                                            <div class="form-group">
+                                                <label>Types</label>
+                                                <div>
+                                                    <!-- Checkbox pour CM -->
+                                                    <div class="form-check">
+                                                        <input class="form-check-input" type="checkbox" name="types" id="type-cm" value="CM">
+                                                        <label class="form-check-label" for="type-cm">
+                                                            CM (Cours Magistral)
+                                                        </label>
+                                                    </div>
+
+                                                    <!-- Checkbox pour TD -->
+                                                    <div class="form-check">
+                                                        <input class="form-check-input" type="checkbox" name="types" id="type-td" value="TD">
+                                                        <label class="form-check-label" for="type-td">
+                                                            TD (Travaux Dirigés)
+                                                        </label>
+                                                    </div>
+
+                                                    <!-- Checkbox pour TP -->
+                                                    <div class="form-check">
+                                                        <input class="form-check-input" type="checkbox" name="types" id="type-tp" value="TP">
+                                                        <label class="form-check-label" for="type-tp">
+                                                            TP (Travaux Pratiques)
+                                                        </label>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                            <button type="submit" class="btn btn-primary">Enregistrer le Choix</button>
+                                        </form>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+
+
+                        <!-- Debut Datatable lister Vacataires -->
+            <script>
+            $(document).ready(function() {
+                $("#table_Vacataire").DataTable({
+
+                });
+            })
+        </script>
+            <!-- Fin Datatable lister Vacataires -->
+
+                        <!-- Debut popup modifier un Vacataire -->
+
+                        <div data-dismiss="modal">
+                            <div class="modal fade" th:attr="id='form_Modifier_Vacataire'+${vacataire.id}" >
+                                <div class="modal-dialog" >
+                                    <div class="modal-content panel-info" >
+                                        <!--modal Header-->
+                                        <div class="modal-header panel-heading" >
+                                            <button type="button" class="close" data-dismiss="modal">x</button>
+                                            <h4 class="modal-title" style="text-align: center">Modifier Vacataire</h4>
+                                        </div>
+                                        <!--modal Body-->
+                                        <form th:action="@{/ChefDepartement/modifierVacataire}" method="post">
+                                            <div class="modal-body" >
+                                                <div style="display: none">
+                                                    <input name="id" th:value="${vacataire.id}" />
+                                                </div>
+                                                <div class="form-group">
+                                                    <label >Nom</label>
+                                                    <input type="text" class="form-control" name="nom" th:value="${vacataire.nom}"/>
+                                                </div>
+                                                <div class="form-group">
+                                                    <label >Prenom(s)</label>
+                                                    <input type="text" class="form-control" name="prenom" th:value="${vacataire.prenom}"/>
+                                                </div>
+                                                <div class="form-group">
+                                                    <label >Specialite</label>
+                                                    <input type="text" class="form-control" name="specialite" th:value="${vacataire.specialite}"/>
+                                                </div>
+                                                <div class="form-group">
+                                                    <label >Niveau</label>
+                                                    <input type="text" class="form-control" name="niveau" th:value="${vacataire.niveau}"/>
+                                                </div>
+                                            </div>
+                                            <!--modal Footer-->
+                                            <div class="modal-footer" >
+                                                <div class="row">
+                                                    <div class="col-lg-3  col-md-3 col-sm-3 col-xs-4">
+                                                        <button type="submit" class="btn btn-info" >Modifier</button>
+                                                    </div>
+                                                    <div class="col-lg-offset-5 col-lg-3 col-md-offset-5 col-md-3 col-sm-offset-5 col-sm-3 col-xs-8">
+                                                        <button type="button" class="btn btn-default " data-dismiss="modal">Annuler</button>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </form>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Fin popup modifier un Vacataire -->
+                        <!-- Debut popup Activer un Vacataire -->
+
+                        <div data-dismiss="modal">
+                            <div class="modal fade" th:attr="id='form_Activer_Vacataire'+${vacataire.id}">
+                                <div class="modal-dialog" >
+
+                                    <div th:if="${vacataire.isActive()} == false" class="modal-content panel-success" >
+                                        <!--modal Header-->
+                                        <div class="modal-header panel-heading" >
+                                            <button type="button" class="close" data-dismiss="modal">x</button>
+                                            <h4 class="modal-title" style="text-align: center">Activer Vacataire</h4>
+                                        </div>
+                                        <!--modal Body-->
+                                        <form th:action="@{/ChefDepartement/activerVacataire}" method="post">
+                                            <div class="modal-body" >
+                                                <div style="display: none">
+                                                    <input name="id" th:value="${vacataire.id}" />
+                                                </div>
+                                                <div class="form-group">
+                                                    <label >Nom</label> :
+                                                    <span th:text="${vacataire.nom}"/> </span>
+                                                </div>
+                                                <div class="form-group">
+                                                    <label >Prenom(s)</label> :
+                                                    <span th:text="${vacataire.prenom}"/> </span>
+                                                </div>
+                                                <div class="form-group">
+                                                    <label >Specialite</label> :
+                                                    <span th:text="${vacataire.specialite}"/> </span>
+                                                </div>
+                                                <div class="form-group">
+                                                    <label >Niveau</label> :
+                                                    <span th:text="${vacataire.niveau}"/> </span>
+                                                </div>
+                                            </div>
+                                            <!--modal Footer-->
+                                            <div class="modal-footer" >
+                                                <div class="row">
+                                                    <div class="col-lg-3  col-md-3 col-sm-3 col-xs-4">
+                                                        <button type="submit" class="btn btn-success">Activer</button>
+                                                    </div>
+                                                    <div class="col-lg-offset-5 col-lg-3 col-md-offset-5 col-md-3 col-sm-offset-5 col-sm-3 col-xs-8">
+                                                        <button type="button" class="btn btn-default " data-dismiss="modal">Annuler</button>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </form>
+                                    </div>
+
+                                    <div th:if="${vacataire.isActive()} == true" class="modal-content panel-danger" >
+                                        <!--modal Header-->
+                                        <div class="modal-header panel-heading" >
+                                            <button type="button" class="close" data-dismiss="modal">x</button>
+                                            <h4 class="modal-title" style="text-align: center">Desactiver Vacataire</h4>
+                                        </div>
+                                        <!--modal Body-->
+                                        <form th:action="@{/ChefDepartement/activerVacataire}" method="post">
+                                            <div class="modal-body" >
+                                                <div style="display: none">
+                                                    <input name="id" th:value="${vacataire.id}" />
+                                                </div>
+                                                <div class="form-group">
+                                                    <label >Nom</label> :
+                                                    <span th:text="${vacataire.nom}"/> </span>
+                                                </div>
+                                                <div class="form-group">
+                                                    <label >Prenom(s)</label> :
+                                                    <span th:text="${vacataire.prenom}"/> </span>
+                                                </div>
+                                                <div class="form-group">
+                                                    <label >Specialite</label> :
+                                                    <span th:text="${vacataire.specialite}"/> </span>
+                                                </div>
+                                                <div class="form-group">
+                                                    <label >niveau</label> :
+                                                    <span th:text="${vacataire.niveau}"/> </span>
+                                                </div>
+                                            </div>
+                                            <!--modal Footer-->
+                                            <div class="modal-footer" >
+                                                <div class="row">
+                                                    <div class="col-lg-3  col-md-3 col-sm-3 col-xs-4">
+                                                        <button type="submit" class="btn btn-danger">Desactiver</button>
+                                                    </div>
+                                                    <div class="col-lg-offset-5 col-lg-3 col-md-offset-5 col-md-3 col-sm-offset-5 col-sm-3 col-xs-8">
+                                                        <button type="button" class="btn btn-default " data-dismiss="modal">Annuler</button>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </form>
+                                    </div>
+
+                                </div>
+                            </div>
+                        </div>
+                        <!-- Fin popup Activer un Vacataire -->
+
+                        <!-- Debut popup Archiver un Vacataire -->
+                        <div data-dismiss="modal">
+                            <div class="modal fade" th:attr="id='form_Archiver_Vacataire'+${vacataire.id}">
+                                <div class="modal-dialog" >
+
+                                    <div th:if="${vacataire.isArchive()} == false" class="modal-content panel-warning" >
+                                        <!--modal Header-->
+                                        <div class="modal-header panel-heading" >
+                                            <button type="button" class="close" data-dismiss="modal">x</button>
+                                            <h4 class="modal-title" style="text-align: center">Archiver Vacataire</h4>
+                                        </div>
+                                        <!--modal Body-->
+                                        <form th:action="@{/ChefDepartement/archiverVacataire}" method="post">
+                                            <div class="modal-body" >
+                                                <div style="display: none">
+                                                    <input name="id" th:value="${vacataire.id}" />
+                                                </div>
+                                                <div class="form-group">
+                                                    <label >Nom</label> :
+                                                    <span th:text="${vacataire.nom}"/> </span>
+                                                </div>
+                                                <div class="form-group">
+                                                    <label >Prenom(s)</label> :
+                                                    <span th:text="${vacataire.prenom}"/> </span>
+                                                </div>
+                                                <div class="form-group">
+                                                    <label >Specialite</label> :
+                                                    <span th:text="${vacataire.specialite}"/> </span>
+                                                </div>
+                                                <div class="form-group">
+                                                    <label >Niveau</label> :
+                                                    <span th:text="${vacataire.niveau}"/> </span>
+                                                </div>
+                                            </div>
+                                            <!--modal Footer-->
+                                            <div class="modal-footer" >
+                                                <div class="row">
+                                                    <div class="col-lg-3  col-md-3 col-sm-3 col-xs-4">
+                                                        <button type="submit" class="btn btn-warning">Archiver</button>
+                                                    </div>
+                                                    <div class="col-lg-offset-5 col-lg-3 col-md-offset-5 col-md-3 col-sm-offset-5 col-sm-3 col-xs-8">
+                                                        <button type="button" class="btn btn-default " data-dismiss="modal">Annuler</button>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </form>
+                                    </div>
+
+                                    <div th:if="${vacataire.isArchive()} == true" class="modal-content panel-primary" >
+                                        <!--modal Header-->
+                                        <div class="modal-header panel-heading" >
+                                            <button type="button" class="close" data-dismiss="modal">x</button>
+                                            <h4 class="modal-title" style="text-align: center">Desarchiver Vacataire</h4>
+                                        </div>
+                                        <!--modal Body-->
+                                        <form th:action="@{/ChefDepartement/archiverVacataire}" method="post">
+                                            <div class="modal-body" >
+                                                <div style="display: none">
+                                                    <input name="id" th:value="${vacataire.id}" />
+                                                </div>
+                                                <div class="form-group">
+                                                    <label >Nom</label> :
+                                                    <span th:text="${vacataire.nom}"/> </span>
+                                                </div>
+                                                <div class="form-group">
+                                                    <label >Prenom(s)</label> :
+                                                    <span th:text="${vacataire.prenom}"/> </span>
+                                                </div>
+                                                <div class="form-group">
+                                                    <label >Specialite</label> :
+                                                    <span th:text="${vacataire.specialite}"/> </span>
+                                                </div>
+                                                <div class="form-group">
+                                                    <label >Niveau</label> :
+                                                    <span th:text="${vacataire.grade}"/> </span>
+                                                </div>
+                                            </div>
+                                            <!--modal Footer-->
+                                            <div class="modal-footer" >
+                                                <div class="row">
+                                                    <div class="col-lg-3  col-md-3 col-sm-3 col-xs-4">
+                                                        <button type="submit" class="btn btn-primary">desarchiver</button>
+                                                    </div>
+                                                    <div class="col-lg-offset-5 col-lg-3 col-md-offset-5 col-md-3 col-sm-offset-5 col-sm-3 col-xs-8">
+                                                        <button type="button" class="btn btn-default " data-dismiss="modal">Annuler</button>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </form>
+                                    </div>
+
+                                </div>
+                            </div>
+                        </div>
+                        <!-- Debut popup Archiver un Vacataire -->
+
+                    </tr>
+                    </tbody>
+                </table>
+            </div>
+            <!-- Fin lister tout les Vacataires -->
+
+        </div>
+
+    </div>
+
+
+
+</div>
+
+
+
+
+
+</body>
+</html>

@@ -1,0 +1,299 @@
+<!DOCTYPE html>
+<html lang="fr" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <title>Gestion des Classes - Formation</title>
+
+    <!-- Bootstrap CSS -->
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@3.4.1/dist/css/bootstrap.min.css">
+    <!-- DataTables CSS -->
+    <link rel="stylesheet" href="https://cdn.datatables.net/1.13.5/css/jquery.dataTables.min.css">
+
+    <style>
+        /* Custom styles */
+        .btn-custom {
+            background-color: #007bff;
+            color: white;
+            border-radius: 5px;
+            font-size: 14px;
+        }
+
+        .table-container table {
+            width: 100%;
+            margin-top: 20px;
+            border-collapse: collapse;
+        }
+
+        .table-container th, .table-container td {
+            padding: 12px;
+            text-align: center;
+        }
+
+        .table-container th {
+            background-color: #007bff;
+            color: white;
+        }
+
+        .modal-title {
+            text-align: center;
+        }
+    </style>
+</head>
+<body>
+
+<header>
+    <nav class="navbar navbar-inverse">
+        <div class="container-fluid">
+            <div class="collapse navbar-collapse" id="bs-example-navbar-collapse-1">
+                <ul class="nav navbar-nav navbar-left">
+                    <li>
+                        <a><span>Accueil</span></a>
+                    </li>
+                    <li>
+                        <a th:href="@{/Emplois}"><span>Emploi du Temps</span></a>
+                    </li>
+                    <li class="dropdown">
+                        <a href="#" class="dropdown-toggle" data-toggle="dropdown">
+                            <span>Syllabus</span><span class="caret"></span>
+                        </a>
+                        <ul class="dropdown-menu">
+                            <li><a th:href="@{/Maquette}">maquette</a></li>
+                            <li><a th:href="@{/Batiment}">batiment</a></li>
+                            <li><a th:href="@{/Salle}">salle</a></li>
+                        </ul>
+                    </li>
+                    <li>
+                        <a th:href="@{/Choix}"><span>Repartition</span></a>
+                    </li>
+                    <li>
+                        <a th:href="@{/ChefDepartement/Enseignant}"><span>Enseignants</span></a>
+                    </li>
+                    <!-- Ajout de l'élément Maquette avec sous-menus -->
+                    <li class="dropdown">
+                        <a href="#" class="dropdown-toggle" data-toggle="dropdown">
+                            <span>Maquettes</span><span class="caret"></span>
+                        </a>
+                        <ul class="dropdown-menu">
+                            <li><a th:href="@{/Formation}">formation</a></li>
+                            <li><a th:href="@{/Classe}">classe</a></li>
+                            <li><a th:href="@{/EC}">EC</a></li>
+                            <li><a th:href="@{/UE}">UE</a></li>
+                        </ul>
+                    </li>
+                </ul>
+                <ul class="nav navbar-nav navbar-right">
+                    <li class="dropdown">
+                        <a href="#" class="dropdown-toggle" data-toggle="dropdown">
+                            <span th:text="${prenom + '. ' + nom}"></span><span class="caret"></span>
+                        </a>
+                        <ul class="dropdown-menu">
+                            <li>
+                                <a th:href="@{/profil}"><span>Profil</span></a>
+                            </li>
+                            <li>
+                                <a th:href="@{/logout}"><span>Deconnexion</span></a>
+                            </li>
+                        </ul>
+                    </li>
+                </ul>
+            </div><!-- /.navbar-collapse -->
+        </div><!-- /.container-fluid -->
+    </nav>
+</header>
+<div class="container">
+    <h3 class="text-center">Gestion des Classes  : <span th:if="${formation != null}" th:text="'de la Formation '+${formation.intitule}"></span></h3>
+
+    <div class="text-left" style="margin: 20px 0;">
+        <button class="btn btn-custom" data-toggle="modal" data-target="#ajouterClasseModal">Ajouter une Classe</button>
+    </div>
+
+    <!-- Table des classes -->
+    <div class="table-responsive">
+        <table id="tableClasses" class="table table-bordered table-striped">
+            <thead>
+            <tr>
+                <th>Nom</th>
+                <th>Niveau</th>
+                <th>Actions</th>
+                <th>Détails</th>
+            </tr>
+            </thead>
+            <tbody>
+            <tr th:each="classe : ${classes}">
+                <td th:text="${classe.formation.intitule}"></td>
+                <td th:text="${classe.niveau}"></td>
+                <td>
+                    <!-- Bouton Modifier -->
+                    <button class="btn btn-info btn-sm" data-toggle="modal"
+                            th:attr="data-target='#modifierClasse_' + ${classe.id}">
+                        Modifier
+                    </button>
+
+                    <!-- Bouton Supprimer -->
+                    <button class="btn btn-danger btn-sm" data-toggle="modal"
+                            th:attr="data-target='#supprimerClasse_' + ${classe.id}">
+                        Supprimer
+                    </button>
+                    <button th:if="${classe.isArchive()} == false" class="btn btn-warning btn-xs" data-toggle="modal" th:attr="data-target='#form_Archiver_Permanent'+${classe.id}">
+                        Archiver
+                    </button>
+                    <button th:if="${classe.isArchive()} == true" class="btn btn-primary btn-xs" data-toggle="modal" th:attr="data-target='#form_Archiver_Permanent'+${classe.id}">
+                        Desarchiver
+                    </button>
+                </td>
+                <td>
+                    <form th:action="@{/Classe/voirDetail}" method="get">
+                        <input type="hidden" name="id" th:value="${classe.id}">
+                        <input type="submit" value="Voir" class="btn btn-primary btn-sm">
+                    </form>
+                </td>
+                <!-- Modale Modifier Classe -->
+                <div class="modal fade" th:attr="id='modifierClasse_' + ${classe.id}" tabindex="-1" role="dialog" aria-labelledby="modifierClasseLabel">
+                    <div class="modal-dialog" role="document">
+                        <div class="modal-content">
+                            <div class="modal-header">
+                                <h5 class="modal-title" id="modifierClasseLabel">Modifier la Classe</h5>
+                                <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                                    <span aria-hidden="true">&times;</span>
+                                </button>
+                            </div>
+                            <div class="modal-body">
+                                <form th:action="@{/Classe/modifierClasse}" method="post">
+                                    <input type="hidden" name="id" th:value="${classe.id}">
+                                    <div class="form-group">
+                                        <label for="nom">Formation</label>
+                                        <input type="text" class="form-control" id="nom" th:value="${classe.formation.intitule}" readonly>
+                                    </div>
+                                    <div class="form-group">
+                                        <label for="niveau">Niveau</label>
+                                        <select id="niveau" name="niveau" class="form-control">
+                                            <option value="1">1</option>
+                                            <option value="2">2</option>
+                                            <option value="3">3</option>
+                                            <option value="4">4</option>
+                                            <option value="5">5</option>
+                                        </select>
+                                    </div>
+                                    <button type="submit" class="btn btn-primary">Enregistrer</button>
+                                </form>
+                            </div>
+                            <div class="modal-footer">
+                                <button type="button" class="btn btn-secondary" data-dismiss="modal">Fermer</button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Modale Supprimer Classe -->
+                <div class="modal fade" th:attr="id='supprimerClasse_' + ${classe.id}" tabindex="-1" role="dialog" aria-labelledby="supprimerClasseLabel">
+                    <div class="modal-dialog" role="document">
+                        <div class="modal-content">
+                            <div class="modal-header">
+                                <h5 class="modal-title" id="supprimerClasseLabel">Supprimer la Classe</h5>
+                                <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                                    <span aria-hidden="true">&times;</span>
+                                </button>
+                            </div>
+                            <div class="modal-body">
+                                <p>Êtes-vous sûr de vouloir supprimer la classe <span th:text="${classe.formation.intitule}"></span> ?</p>
+                            </div>
+                            <div class="modal-footer">
+                                <form th:action="@{/Classe/supprimerClasse}" method="post">
+                                    <input type="hidden" name="id" th:value="${classe.id}">
+                                    <button type="submit" class="btn btn-danger">Confirmer</button>
+                                </form>
+                                <button type="button" class="btn btn-secondary" data-dismiss="modal">Annuler</button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Modal Archiver / Desarchiver Classe -->
+                <div class="modal fade" th:id="'form_Archiver_Permanent'+${classe.id}" tabindex="-1" role="dialog">
+                    <div class="modal-dialog">
+                        <div class="modal-content">
+                            <div th:if="${classe.isArchive()} == false" class="modal-header panel-warning">
+                                <button type="button" class="close" data-dismiss="modal">&times;</button>
+                                <h4 class="modal-title">Archiver Classe</h4>
+                            </div>
+
+                            <div th:if="${classe.isArchive()} == false" class="modal-body">
+                                <form th:action="@{/Classe/archiver}" method="post">
+                                    <input type="hidden" name="id" th:value="${classe.id}">
+                                    <button type="submit" class="btn btn-warning">Archiver</button>
+                                    <button type="button" class="btn btn-default" data-dismiss="modal">Annuler</button>
+                                </form>
+                            </div>
+
+                            <div th:if="${classe.isArchive()} == true" class="modal-header panel-primary">
+                                <button type="button" class="close" data-dismiss="modal">&times;</button>
+                                <h4 class="modal-title">Desarchiver Classe</h4>
+                            </div>
+
+                            <div th:if="${classe.isArchive()} == true" class="modal-body">
+                                <form th:action="@{/Classe/archiver}" method="post">
+                                    <input type="hidden" name="id" th:value="${classe.id}">
+                                    <button type="submit" class="btn btn-primary">Desarchiver</button>
+                                    <button type="button" class="btn btn-default" data-dismiss="modal">Annuler</button>
+                                </form>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </tr>
+            </tbody>
+        </table>
+    </div>
+    <!-- Modal Ajouter Classe -->
+    <div class="modal fade" id="ajouterClasseModal" tabindex="-1" role="dialog" aria-labelledby="ajouterClasseLabel">
+        <div class="modal-dialog" role="document">
+            <div class="modal-content">
+                <form th:action="@{/Classe/ajouterClasse}" method="post">
+                    <div class="modal-header">
+                        <button type="button" class="close" data-dismiss="modal">&times;</button>
+                        <h4 class="modal-title">Ajouter une Classe</h4>
+                    </div>
+                    <div class="modal-body">
+
+                        <div class="form-group">
+                            <label for="niveauClasse">Formation</label>
+                            <select id="formation" name="idFormation" class="form-control">
+                                <option th:each="formation : ${formations}" th:value="${formation.id}" th:text="${formation.intitule}"></option>
+                            </select>
+                        </div>
+
+                        <div class="form-group">
+                            <label for="niveauClasse">Niveau</label>
+                            <select id="niveauClasse" name="niveau" class="form-control">
+                                <option value="1">1</option>
+                                <option value="2">2</option>
+                                <option value="3">3</option>
+                                <option value="4">4</option>
+                                <option value="5">5</option>
+                            </select>
+                        </div>
+                    </div>
+                    <div class="modal-footer">
+                        <button type="submit" class="btn btn-primary">Ajouter</button>
+                        <button type="button" class="btn btn-secondary" data-dismiss="modal">Annuler</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+</div>
+
+<!-- Bootstrap JS -->
+<script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@3.4.1/dist/js/bootstrap.min.js"></script>
+
+<!-- DataTables JS -->
+<script src="https://cdn.datatables.net/1.13.5/js/jquery.dataTables.min.js"></script>
+<script>
+    $(document).ready(function() {
+        $('#tableClasses').DataTable();
+    });
+</script>
+</body>
+</html>

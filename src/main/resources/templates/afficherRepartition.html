@@ -1,0 +1,110 @@
+<!DOCTYPE html>
+<html lang="fr" xmlns="http://www.w3.org/1999/xhtml" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Répartition des Enseignements</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+        }
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin: 20px 0;
+        }
+        th, td {
+            border: 1px solid #000;
+            padding: 8px;
+            text-align: center;
+        }
+        th {
+            background-color: #f2f2f2;
+            cursor: pointer;
+        }
+        .red-background {
+            background-color: red;
+            color: white;
+            font-weight: bold;
+        }
+        .highlight {
+            background-color: #e6f7ff;
+        }
+        h1{
+            text-align:center;
+        }
+    </style>
+</head>
+<body>
+<h1>Répartition des Enseignements</h1>
+<table id="enseignements">
+    <thead>
+    <tr>
+        <th>Classe</th>
+        <th>Effectif</th>
+        <th>Unité d'Enseignement</th>
+        <th>Crédit</th>
+        <th>Enseignant</th>
+        <th>CM</th>
+        <th>Responsables TD</th>
+        <th>Responsables TP</th>
+        <th>Travaux Dirigés</th>
+        <th>Travaux Pratiques</th>
+    </tr>
+    </thead>
+    <tbody>
+    <!-- Première ligne avec rowspan pour la première cellule -->
+    <tr th:each="ec, iterStat : ${ecs}">
+        <!-- Première cellule avec rowspan -->
+        <td th:if="${iterStat.index == 0}" class="red-background" th:rowspan="${#lists.size(ecs)}" th:text="${classe.formation.intitule + ' Niveau:' + classe.niveau}"></td>
+
+        <!-- Autres cellules -->
+        <td><span th:text="${maquette.semestre}"></span></td>
+        <td th:text="${ec.intitule}">Administration BD (GL)</td>
+        <td th:text="${ec.ue.credit / #lists.size(ec.ue.ecList)}">2</td>
+
+        <!-- Enseignant CM -->
+        <td th:if="${not #lists.isEmpty(choixList)}">
+            <span th:each="seance : ${choixList}" th:if="${seance.enseignement != null and seance.enseignement.ec != null and seance.enseignement.ec.intitule == ec.intitule and seance.enseignement.type == 'CM'}">
+                <span th:text="${seance.enseignant.prenom + ' ' + seance.enseignant.nom}"></span>
+            </span>
+        </td>
+        <td th:text="${ec.CM}"></td>
+
+        <!-- Responsables TD -->
+        <td th:if="${not #lists.isEmpty(choixList)}">
+            <span th:each="seance : ${choixList}" th:if="${seance.enseignement != null and seance.enseignement.ec != null and seance.enseignement.ec.intitule == ec.intitule and seance.enseignement.type == 'TD'}">
+                <span th:text="${seance.enseignant.prenom + ' ' + seance.enseignant.nom}"></span>
+            </span>
+        </td>
+
+        <!-- Responsables TP -->
+        <td th:if="${not #lists.isEmpty(choixList)}">
+            <span th:each="seance : ${choixList}" th:if="${seance.enseignement != null and seance.enseignement.ec != null and seance.enseignement.ec.intitule == ec.intitule and seance.enseignement.type == 'TP'}">
+                <span th:text="${seance.enseignant.prenom + ' ' + seance.enseignant.nom}"></span>
+            </span>
+        </td>
+
+        <td th:text="${ec.TD}">0</td>
+        <td th:text="${ec.TP}">10</td>
+    </tr>
+    </tbody>
+</table>
+
+<script>
+    document.querySelectorAll('th').forEach(header => {
+        header.addEventListener('click', () => {
+            const table = header.parentElement.parentElement.parentElement;
+            const index = Array.from(header.parentElement.children).indexOf(header);
+            const rows = Array.from(table.tBodies[0].rows);
+            const sortedRows = rows.sort((a, b) => {
+                const aText = a.cells[index].textContent.trim();
+                const bText = b.cells[index].textContent.trim();
+                return aText.localeCompare(bText, 'fr', { numeric: true });
+            });
+            table.tBodies[0].append(...sortedRows);
+        });
+    });
+</script>
+</body>
+</html>
