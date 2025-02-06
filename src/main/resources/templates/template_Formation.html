@@ -193,7 +193,6 @@
       <tr>
         <th>Intitule</th>
         <th>Actions</th>
-        <th>Details</th>
       </tr>
       </thead>
       <tbody>
@@ -332,13 +331,7 @@
             </div>
           </div>
         </div>
-        <td>
-          <form th:action="@{/Formation/voirDetail}" method="get">
-            <input type="hidden" name="idFormation" th:value="${formation.id}">
-            <input type="submit" value="Voir" class="btn btn-primary btn-sm">
-          </form>
-        </td>
-      </tr>
+       </tr>
       </tbody>
     </table>
   </div>

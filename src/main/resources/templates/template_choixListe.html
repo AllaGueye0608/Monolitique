@@ -154,7 +154,7 @@
                             <div class="modal-dialog" role="document">
                                 <div class="modal-content">
                                     <div class="modal-header">
-                                        <h5 class="modal-title" id="ajouterSeanceModalLabel1">Ajouter une Séance</h5>
+                                        <h5 class="modal-title" id="ajouterSeanceModalLabel2">Ajouter une Séance</h5>
                                         <button type="button" class="close" data-dismiss="modal" aria-label="Close">
                                             <span aria-hidden="true">&times;</span>
                                         </button>
@@ -225,41 +225,6 @@
                                 </div>
                             </div>
                         </div>
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
                         <!-- Modal pour modifier un Choix -->
                         <div class="modal fade" th:id="'modifierChoixModal_' + ${choix.id}" tabindex="-1" role="dialog" aria-labelledby="modifierChoixModalLabel" aria-hidden="true">
                             <div class="modal-dialog" role="document">
@@ -279,8 +244,10 @@
                                                 <label for="enseignant">Enseignant</label>
                                                 <select class="form-control" id="enseignant1" name="idEnseignant" required>
                                                     <option value="" disabled>-- Sélectionner un enseignant --</option>
-                                                    <option th:each="prof : ${enseignants}" th:value="${prof.id}" th:text="${prof.nom + ' ' + prof.prenom}" th:selected="${choix.enseignant.id == prof.id}"></option>
-                                                </select>
+                                                    <option th:each="prof : ${enseignants}"
+                                                            th:value="${prof.id}"
+                                                            th:text="${prof.nom + ' ' + prof.prenom}"
+                                                            th:selected="${choix.enseignant.id == prof.id}"></option>                                                </select>
                                             </div>
 
                                             <!-- Sélection de l'enseignement -->

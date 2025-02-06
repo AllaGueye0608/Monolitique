@@ -153,7 +153,6 @@ public class UEController {
                         if (!enseignementService.exists(maquette, ue, ec, type)) {
                             Enseignement enseignement = new Enseignement();
                             enseignement.setMaquette(maquette);
-                            enseignement.setUe(ue);
                             enseignement.setEc(ec);
                             enseignement.setType(type);
                             enseignementService.save(enseignement);
@@ -211,7 +210,6 @@ public class UEController {
                         if (!enseignementService.exists(maquette, ec1.getUe(), ec1, type)) {
                             Enseignement enseignement = new Enseignement();
                             enseignement.setMaquette(maquette);
-                            enseignement.setUe(ec1.getUe());
                             enseignement.setEc(ec);
                             enseignement.setType(type);
                             enseignementService.save(enseignement);

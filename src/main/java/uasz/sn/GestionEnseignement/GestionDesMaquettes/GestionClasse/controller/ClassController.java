@@ -76,22 +76,6 @@ public class ClassController {
         return "redirect:/Classe";
     }
 
-    @GetMapping("/Classe/voirDetail")
-    public String voirMaquette(Model model,Long id,Principal principal){
-        User permanent = userService.findByUsername(principal.getName());
-        model.addAttribute("nom",permanent.getNom());
-        model.addAttribute("prenom",permanent.getPrenom().charAt(0));
-
-        List<Classe> classes = new ArrayList<>();
-        Classe classe = classeService.findById(id);
-        classes.add(classe);
-        List<Maquette> maquettes = classe.getMaquettes();
-        List<UE> ues = ueService.findAll();
-        model.addAttribute("maquettes",maquettes);
-        model.addAttribute("ues",ues);
-        model.addAttribute("classes",classes);
-        return "template_Maquette";
-    }
 
     @PostMapping("/Classe/ajouterMaquette")
     public String ajouterMaquette(Long classe, Long[] idUEs, int semestre) {
@@ -122,7 +106,6 @@ public class ClassController {
                     for (String type : types) {
                         Enseignement enseignement = new Enseignement();
                         enseignement.setMaquette(maquette1);
-                        enseignement.setUe(ue);
                         enseignement.setEc(ec);
                         enseignement.setType(type);
                         enseignementService.save(enseignement);

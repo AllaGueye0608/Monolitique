@@ -266,37 +266,55 @@ public class SeanceController {
             @RequestParam Long idEnseignement,
             @RequestParam String type
     ) {
+        // Récupérer les entités depuis la base de données
         Choix choix = choixService.findById(idChoix);
         Enseignant enseignant = enseignantService.findById(idEnseignant);
         Enseignement enseignement = enseignementService.findById(idEnseignement);
 
-        if (choix == null || enseignant == null || enseignement == null || type == null) {
-            return "redirect:/Choix?error=donnees_invalides";
+        // Valider les entités
+        if (choix == null || enseignant == null || enseignement == null) {
+            return "redirect:/Choix?error=donnees_invalides"; // Rediriger si une entité est introuvable
         }
 
-        for (Enseignement enseignement1 : enseignementService.findAll()) {
-            if (enseignement1.getEc().equals(enseignement.getEc()) &&
-                    enseignement1.getMaquette().equals(enseignement.getMaquette()) &&
-                    enseignement1.getType().equals(type)) {
+        // Vérifier si l'enseignement a changé
+        if (!enseignement.equals(choix.getEnseignement())) {
+            Enseignement matchingEnseignement = null;
 
-                // Vérifier si cet enseignement est déjà choisi
-                if (!choixService.estChoisi(enseignement1)) {
-                    choix.setEnseignant(enseignant);
-                    choix.setEnseignement(enseignement1);
-                    choix.setDateChoix(LocalDate.now());
-
-                    choixService.update(choix);
-                    enseignementService.save(enseignement1);
+            // Parcourir tous les enseignements pour trouver une correspondance
+            for (Enseignement enseignement1 : enseignementService.findAll()) {
+                if (enseignement1.getEc().equals(enseignement.getEc()) &&
+                        enseignement1.getMaquette().equals(enseignement.getMaquette()) &&
+                        enseignement1.getType().equals(type)) {
+                    matchingEnseignement = enseignement1; // Enregistrer l'enseignement correspondant
                     break;
-                } else {
-                    return "redirect:/Choix?error=enseignement_deja_choisi";
                 }
             }
+
+            // Si aucun enseignement correspondant n'est trouvé, retourner une erreur
+            if (matchingEnseignement == null) {
+                return "redirect:/Choix?error=enseignement_non_trouve";
+            }
+
+            // Vérifier si l'enseignement correspondant est déjà choisi
+            if (choixService.estChoisi(matchingEnseignement)) {
+                return "redirect:/Choix?error=enseignement_deja_choisi";
+            }
+
+            // Mettre à jour l'enseignement dans le choix
+            choix.setEnseignement(matchingEnseignement);
         }
 
+        // Vérifier si l'enseignant a changé
+        if (!enseignant.equals(choix.getEnseignant())) {
+            choix.setEnseignant(enseignant); // Mettre à jour l'enseignant dans le choix
+        }
+
+        // Sauvegarder le choix mis à jour
+        choixService.update(choix);
+
+        // Rediriger avec un message de succès
         return "redirect:/Choix?success=choix_modifie";
     }
-
     @PostMapping("/Choix/supprimerChoix")
     public String supprimerChoix(Long id){
         Choix choix = choixService.findById(id);
