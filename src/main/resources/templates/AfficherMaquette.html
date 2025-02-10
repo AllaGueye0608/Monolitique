@@ -1,0 +1,160 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <title th:text="'Maquette' + ${maquette.nom}"></title>
+    <link rel="stylesheet" href="../static/css/bootstrap.css" th:href="@{/css/bootstrap.css}"/>
+    <script src="../static/js/bootstrap.js" th:src="@{/js/bootstrap.js}"></script>
+
+    <style>
+        .table-container {
+            margin: 20px; /* Applique une marge autour du conteneur */
+        }
+        table {
+            border-collapse: collapse;
+            width: 100%; /* Le tableau occupe toute la largeur du conteneur */
+        }
+        th, td {
+            border: 1px solid black;
+            text-align: center;
+            padding: 8px;
+        }
+        th {
+            background-color: #f2f2f2;
+        }
+        .highlight {
+            background-color: #ffff99;
+        }
+    </style>
+</head>
+<body>
+<header>
+    <nav class="navbar navbar-inverse">
+        <div class="container-fluid">
+            <div class="collapse navbar-collapse" id="bs-example-navbar-collapse-1">
+                <ul class="nav navbar-nav navbar-left">
+                    <li>
+                        <a><span>Accueil</span></a>
+                    </li>
+                    <li>
+                        <a><span>Emploi du Temps</span></a>
+                    </li>
+                    <li class="dropdown">
+                        <a href="#" class="dropdown-toggle" data-toggle="dropdown">
+                            <span>Syllabus</span><span class="caret"></span>
+                        </a>
+                        <ul class="dropdown-menu">
+                            <li><a th:href="@{/Choix}">choix</a></li>
+                            <li><a th:href="@{/Maquette}">maquette</a></li>
+                            <li><a th:href="@{/Batiment}">batiment</a></li>
+                            <li><a th:href="@{/Salle}">salle</a></li>
+                        </ul>
+                    </li>
+                    <li>
+                        <a><span>Repartition</span></a>
+                    </li>
+                    <li>
+                        <a th:href="@{/ChefDepartement/Enseignant}"><span>Enseignants</span></a>
+                    </li>
+                    <!-- Ajout de l'élément Maquette avec sous-menus -->
+                    <li class="dropdown">
+                        <a href="#" class="dropdown-toggle" data-toggle="dropdown">
+                            <span>Maquettes</span><span class="caret"></span>
+                        </a>
+                        <ul class="dropdown-menu">
+                            <li><a th:href="@{/Formation}">formation</a></li>
+                            <li><a th:href="@{/Classe}">classe</a></li>
+                            <li><a th:href="@{/EC}">EC</a></li>
+                            <li><a th:href="@{/UE}">UE</a></li>
+                        </ul>
+                    </li>
+                </ul>
+                <ul class="nav navbar-nav navbar-right">
+                    <li class="dropdown">
+                        <a href="#" class="dropdown-toggle" data-toggle="dropdown">
+                            <span th:text="${prenom + '. ' + nom}"></span><span class="caret"></span>
+                        </a>
+                        <ul class="dropdown-menu">
+                            <li>
+                                <a th:href="@{/profil}"><span>Profil</span></a>
+                            </li>
+                            <li>
+                                <a th:href="@{/logout}"><span>Deconnexion</span></a>
+                            </li>
+                        </ul>
+                    </li>
+                </ul>
+            </div><!-- /.navbar-collapse -->
+        </div><!-- /.container-fluid -->
+    </nav>
+</header>
+
+
+
+<h1 th:text="'Maquette ' + ${maquette.nom} + ' - Semestre ' + ${maquette.semestre}"></h1>
+
+<div class="table-container">
+    <table>
+        <thead>
+        <tr>
+            <th colspan="3">UNITES D'ENSEIGNEMENTS Semestre <span th:text="${maquette.semestre}"></span></th>
+            <th colspan="8">ELEMENTS CONSTITUTIFS</th>
+        </tr>
+        <tr>
+            <th>Intitulés</th>
+            <th>Crédits</th>
+            <th>Coef UE</th>
+            <th>Intitulés</th>
+            <th>CM</th>
+            <th>TD</th>
+            <th>TP</th>
+            <th>Coef.</th>
+        </tr>
+        </thead>
+        <tbody th:each="ue : ${listeUE}">
+        <tr>
+            <td th:text="${ue.intitule}" th:rowspan="${#lists.size(ue.ecList)}"></td>
+            <td th:text="${ue.credit}" th:rowspan="${#lists.size(ue.ecList)}"></td>
+            <td th:text="${ue.coefficient}" th:rowspan="${#lists.size(ue.ecList)}"></td>
+
+            <!-- Vérification si ue.ecList existe et contient au moins un élément -->
+            <td th:if="${ue.ecList != null and #lists.size(ue.ecList) > 0}"
+                th:text="${ue.ecList[0].intitule}" th:classappend="0 % 2 == 0 ? 'highlight' : ''"></td>
+            <td th:if="${ue.ecList != null and #lists.size(ue.ecList) > 0}"
+                th:text="${ue.ecList[0].CM}"></td>
+            <td th:if="${ue.ecList != null and #lists.size(ue.ecList) > 0}"
+                th:text="${ue.ecList[0].TD}"></td>
+            <td th:if="${ue.ecList != null and #lists.size(ue.ecList) > 0}"
+                th:text="${ue.ecList[0].TP}"></td>
+            <td th:if="${ue.ecList != null and #lists.size(ue.ecList) > 0}"
+                th:text="${ue.ecList[0].coefficient}"></td>
+        </tr>
+
+        <!-- Lignes supplémentaires pour les EC suivants -->
+        <tr th:each="ec, iter : ${ue.ecList}" th:if="${iter.index > 0}">
+            <td th:text="${ec.intitule}"></td>
+            <td th:text="${ec.CM}"></td>
+            <td th:text="${ec.TD}"></td>
+            <td th:text="${ec.TP}"></td>
+            <td th:text="${ec.coefficient}"></td>
+        </tr>
+
+        </tbody>
+        <tfoot>
+        <tr>
+            <td th:text="'TOTAL SEMESTRE '+${maquette.semestre}"></td>
+            <td th:text="${credit}"></td>
+            <td th:text="${coeffUE}"></td>
+            <td th:text="'TOTAL SEMESTRE '+${maquette.semestre}"></td>
+            <td th:text="${cm}"></td>
+            <td th:text="${td}"></td>
+            <td th:text="${tp}"></td>
+            <td th:text="${coefficient}"></td>
+        </tr>
+        </tfoot>
+    </table>
+</div>
+</body>
+<script src="https://ajax.googleapis.com/ajax/libs/jquery/3.5.1/jquery.min.js"></script>
+<script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/js/bootstrap.min.js"></script>
+
+</html>

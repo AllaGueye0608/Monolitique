@@ -1,0 +1,423 @@
+<!DOCTYPE html>
+
+<html lang="en" xmlns:th="http://www.thymleaf.org" xmlns="http://www.w3.org/1999/html">
+<head>
+    <meta charset="UTF-8">
+    <link  rel="stylesheet" href="../static/css/bootstrap.css" th:href="@{/css/bootstrap.css}"/>
+    <link  rel="stylesheet" href="../static/css/buttons.dataTables.min.css" th:href="@{/css/buttons.dataTables.min.css}"/>
+    <link  rel="stylesheet" href="../static/css/jquery.dataTables.min.css" th:href="@{/css/jquery.dataTables.min.css}"/>
+
+    <script src="../static/js/jquery-3.7.0.js" th:src="@{/js/jquery-3.7.0.js}"></script>
+    <script src="../static/js/bootstrap.js" th:src="@{/js/bootstrap.js}"></script>
+    <script src="../static/js/dataTables.buttons.min.js" th:src="@{/js/dataTables.buttons.min.js}"></script>
+    <script src="../static/js/jquery.dataTables.min.js" th:src="@{/js/jquery.dataTables.min.js}"></script>
+
+    <title>Title</title>
+</head>
+<body>
+
+<header>
+    <nav class="navbar navbar-inverse">
+        <div class="container-fluid">
+            <div class="collapse navbar-collapse" id="bs-example-navbar-collapse-1">
+                <ul class="nav navbar-nav navbar-left">
+                    <li>
+                        <a><span>Accueil</span></a>
+                    </li>
+                    <li>
+                        <a th:href="@{/Emplois}"><span>Emploi du Temps</span></a>
+                    </li>
+                    <li class="dropdown">
+                        <a href="#" class="dropdown-toggle" data-toggle="dropdown">
+                            <span>Syllabus</span><span class="caret"></span>
+                        </a>
+                        <ul class="dropdown-menu">
+                            <li><a th:href="@{/Maquette}">maquette</a></li>
+                            <li><a th:href="@{/Batiment}">batiment</a></li>
+                            <li><a th:href="@{/Salle}">salle</a></li>
+                        </ul>
+                    </li>
+                    <li>
+                        <a th:href="@{/Choix}"><span>Repartition</span></a>
+                    </li>
+                    <li>
+                        <a th:href="@{/ChefDepartement/Enseignant}"><span>Enseignants</span></a>
+                    </li>
+                    <!-- Ajout de l'élément Maquette avec sous-menus -->
+                    <li class="dropdown">
+                        <a href="#" class="dropdown-toggle" data-toggle="dropdown">
+                            <span>Maquettes</span><span class="caret"></span>
+                        </a>
+                        <ul class="dropdown-menu">
+                            <li><a th:href="@{/Formation}">formation</a></li>
+                            <li><a th:href="@{/Classe}">classe</a></li>
+                            <li><a th:href="@{/EC}">EC</a></li>
+                            <li><a th:href="@{/UE}">UE</a></li>
+                        </ul>
+                    </li>
+                </ul>
+                <ul class="nav navbar-nav navbar-right">
+                    <li class="dropdown">
+                        <a href="#" class="dropdown-toggle" data-toggle="dropdown">
+                            <span th:text="${prenom + '. ' + nom}"></span><span class="caret"></span>
+                        </a>
+                        <ul class="dropdown-menu">
+                            <li>
+                                <a th:href="@{/profil}"><span>Profil</span></a>
+                            </li>
+                            <li>
+                                <a th:href="@{/logout}"><span>Deconnexion</span></a>
+                            </li>
+                        </ul>
+                    </li>
+                </ul>
+            </div><!-- /.navbar-collapse -->
+        </div><!-- /.container-fluid -->
+    </nav>
+</header>
+<div class="container">
+
+    <br/>
+
+    <h3 style="text-align: center">La liste des EC de l'UE:<span th:text="${ue.code}"></span> <span th:text="${ue.intitule}"></span></h3>
+
+
+    <div class="row" style="padding-bottom: 10px; padding-top: 10px">
+        <div style="text-align: center">
+            <button type="button" class="btn btn-success" data-toggle="modal" data-target="#form_Ajouter_Etudiant" >Ajouter EC</button>
+        </div>
+    </div>
+
+    <!-- Debut popup ajouter un Etudiant -->
+    <div data-dismiss="modal" style="margin-top:25px">
+        <div class="modal fade" id="form_Ajouter_Etudiant">
+            <div class="modal-dialog" >
+                <div class="modal-content panel-success" >
+                    <!--modal Header-->
+                    <div class="modal-header panel-heading" >
+                        <button type="button" class="close" data-dismiss="modal">x</button>
+                        <h4 class="modal-title" style="text-align: center">Ajouter un EC</h4>
+                    </div>
+                    <!--modal Body-->
+                    <form th:action="@{/UE/ajouterEC}" method="post">
+                        <input type="hidden" name="id" th:value="${ue.id}">
+                        <div class="modal-body" >
+                            <div class="form-group">
+                                <label >Code</label>
+                                <input type="text" class="form-control" name="code" />
+                            </div>
+                            <div class="form-group">
+                                <label >Libelle</label>
+                                <input type="text" class="form-control" name="intitule" />
+                            </div>
+
+                            <div class="form-group">
+                                <label >CM</label>
+                                <input type="text" class="form-control" name="CM" />
+                            </div>
+
+                            <div class="form-group">
+                                <label >TD</label>
+                                <input type="text" class="form-control" name="TD" />
+                            </div>
+                            <div class="form-group">
+                                <label >TP</label>
+                                <input type="text" class="form-control" name="TP" />
+                            </div>
+
+                            <div class="form-group">
+                                <label >Coefficient</label>
+                                <input type="text" class="form-control" name="coefficient" />
+                            </div>
+                        </div>
+                        <!--modal Footer-->
+                        <div class="modal-footer" >
+                            <div class="row">
+                                <div class="col-lg-3  col-md-3 col-sm-3 col-xs-4">
+                                    <button type="submit" class="btn btn-success">Ajouter</button>
+                                </div>
+                                <div class="col-lg-offset-5 col-lg-3 col-md-offset-5 col-md-3 col-sm-offset-5 col-sm-3 col-xs-8">
+                                    <button type="submit" class="btn btn-default " data-dismiss="modal">Annuler</button>
+                                </div>
+                            </div>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+    <!-- Fin popup ajouter un Etudiant -->
+    <!-- Champ de recherche aligné à droite -->
+    <div class="row" style="margin-bottom: 5px; text-align: right;">
+        <input type="text" id="searchInput" class="form-control" placeholder="Rechercher..." style="width: 300px; display: inline-block;">
+    </div>
+    <!-- Debut lister tout les Etudiants -->
+    <div class="table-responsive">
+
+
+        <table class="table table-bordered table-striped" id="table_Etudiant">
+            <thead>
+            <tr>
+                <th>Code</th>
+                <th>Libelle</th>
+                <th>CM</th>
+                <th>TD</th>
+                <th>TP</th>
+                <th>VHT</th>
+                <th>TPE</th>
+                <th>Coefficient</th>
+                <th>Opérations</th>
+            </tr>
+            </thead>
+            <tbody>
+            <tr th:each="ec : ${ecList}">
+                <td th:text="${ec.code}"></td>
+                <td th:text="${ec.intitule}"></td>
+                <td th:text="${ec.CM}"></td>
+                <td th:text="${ec.TD}"></td>
+                <td th:text="${ec.TP}"></td>
+                <td th:text="${ec.TD + ec.TP + ec.CM}"></td>
+                <td th:text="${ec.coefficient * (ec.TD + ec.TP + ec.CM)}"></td>
+                <td th:text="${ec.coefficient}"></td>
+                <td>
+                    <button class="btn btn-info btn-sm" data-title="Edit" data-toggle="modal" th:attr="data-target='#form_Modifier_Etudiant'+${ec.id}" >
+                        Modifier
+                    </button>
+                    <button class="btn btn-danger btn-sm" data-title="Delete" data-toggle="modal" th:attr="data-target='#form_Supprimer_Etudiant'+${ec.id}">
+                        Supprimer
+                    </button>
+                    <button th:if="${ec.isActive() == true}" class="btn btn-primary btn-xs" data-toggle="modal" th:attr="data-target='#form_Desactiver'+${ec.id}">
+                        Désactiver
+                    </button>
+                    <!-- Bouton Activer -->
+                    <button th:if="${ec.isActive() == false}" class="btn btn-warning btn-xs" data-toggle="modal" th:attr="data-target='#form_Activer'+${ec.id}">
+                        Activer
+                    </button>
+
+                    <!-- Bouton Archiver -->
+                    <button th:if="${ec.isArchive() == false}" class="btn btn-warning btn-xs" data-toggle="modal" th:attr="data-target='#form_Archiver_Permanent'+${ec.id}">
+                        Archiver
+                    </button>
+
+                    <!-- Bouton Désarchiver -->
+                    <button th:if="${ec.isArchive() == true}" class="btn btn-primary btn-xs" data-toggle="modal" th:attr="data-target='#form_Archiver_Permanent'+${ec.id}">
+                        Désarchiver
+                    </button>
+                    <!-- Modale Archiver/Désarchiver -->
+                    <div class="modal fade" th:attr="id='form_Archiver_Permanent'+${ec.id}">
+                        <div class="modal-dialog">
+                            <div class="modal-content">
+                                <div class="modal-header">
+                                    <button type="button" class="close" data-dismiss="modal">&times;</button>
+                                    <h4 class="modal-title">
+                                        <span th:if="${ec.isArchive() == false}">Archiver EC</span>
+                                        <span th:if="${ec.isArchive() == true}">Désarchiver EC</span>
+                                    </h4>
+                                </div>
+                                <form th:action="@{/EC/archiver}" method="post">
+                                    <div class="modal-body">
+                                        <p>
+                                            <span th:if="${ec.isArchive() == false}">Êtes-vous sûr de vouloir archiver cette UE ?</span>
+                                            <span th:if="${ec.isArchive() == true}">Êtes-vous sûr de vouloir désarchiver cette UE ?</span>
+                                        </p>
+                                        <input type="hidden" name="id" th:value="${ec.id}" />
+                                    </div>
+                                    <div class="modal-footer">
+                                        <button type="submit" class="btn" th:classappend="${ec.isArchive() == false} ? 'btn-warning' : 'btn-primary'">
+                                            <span th:if="${ec.isArchive() == false}">Archiver</span>
+                                            <span th:if="${ec.isArchive() == true}">Désarchiver</span>
+                                        </button>
+                                        <button type="button" class="btn btn-default" data-dismiss="modal">Annuler</button>
+                                    </div>
+                                </form>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Modale Activer -->
+                    <div class="modal fade" th:attr="id='form_Activer'+${ec.id}">
+                        <div class="modal-dialog">
+                            <div class="modal-content">
+                                <div class="modal-header">
+                                    <button type="button" class="close" data-dismiss="modal">&times;</button>
+                                    <h4 class="modal-title">Activer EC</h4>
+                                </div>
+                                <form th:action="@{/EC/activer}" method="post">
+                                    <div class="modal-body">
+                                        <p>Êtes-vous sûr de vouloir activer cette UE ?</p>
+                                        <input type="hidden" name="id" th:value="${ec.id}" />
+                                    </div>
+                                    <div class="modal-footer">
+                                        <button type="submit" class="btn btn-warning">Activer</button>
+                                        <button type="button" class="btn btn-default" data-dismiss="modal">Annuler</button>
+                                    </div>
+                                </form>
+                            </div>
+                        </div>
+                    </div>
+                    <!-- Modale Désactiver -->
+                    <div class="modal fade" th:attr="id='form_Desactiver'+${ec.id}">
+                        <div class="modal-dialog">
+                            <div class="modal-content">
+                                <div class="modal-header">
+                                    <button type="button" class="close" data-dismiss="modal">&times;</button>
+                                    <h4 class="modal-title">Désactiver EC</h4>
+                                </div>
+                                <form th:action="@{/EC/activer}" method="post">
+                                    <div class="modal-body">
+                                        <p>Êtes-vous sûr de vouloir désactiver cette UE ?</p>
+                                        <input type="hidden" name="id" th:value="${ec.id}" />
+                                    </div>
+                                    <div class="modal-footer">
+                                        <button type="submit" class="btn btn-primary">Désactiver</button>
+                                        <button type="button" class="btn btn-default" data-dismiss="modal">Annuler</button>
+                                    </div>
+                                </form>
+                            </div>
+                        </div>
+                    </div>
+
+                </td>
+                <!-- Popups pour modifier et supprimer un EC (identiques à ceux précédemment) -->
+                <!-- Debut popup modifier un Etudiant -->
+                <div data-dismiss="modal">
+                    <div class="modal fade" th:attr="id='form_Modifier_Etudiant'+${ec.id}" >
+                        <div class="modal-dialog" >
+                            <div class="modal-content panel-info" >
+                                <!--modal Header-->
+                                <div class="modal-header panel-heading" >
+                                    <button type="button" class="close" data-dismiss="modal">x</button>
+                                    <h4 class="modal-title" style="text-align: center">Modifier EC</h4>
+                                </div>
+                                <!--modal Body-->
+                                <form th:action="@{/UE/modifierEC}" method="post">
+                                    <div class="modal-body" >
+                                        <input type="hidden" name="idUE" th:value="${ue.id}">
+                                        <div style="display: none">
+                                            <input name="id" th:value="${ec.id}" />
+                                        </div>
+                                        <div class="form-group">
+                                            <label >Code</label>
+                                            <input type="text" class="form-control" name="code" th:value="${ec.code}"/>
+                                        </div>
+                                        <div class="form-group">
+                                            <label >Libelle</label>
+                                            <input type="text" class="form-control" name="intitule" th:value="${ec.intitule}"/>
+                                        </div>
+                                        <div class="form-group">
+                                            <label >CM</label>
+                                            <input type="text" class="form-control" name="CM" th:value="${ec.CM}"/>
+                                        </div>
+                                        <div class="form-group">
+                                            <label >TD</label>
+                                            <input type="text" class="form-control" name="TD" th:value="${ec.TD}"/>
+                                        </div>
+                                        <div class="form-group">
+                                            <label >TP</label>
+                                            <input type="text" class="form-control" name="TP" th:value="${ec.TP}"/>
+                                        </div>
+                                        <div class="form-group">
+                                            <label >Coefficient</label>
+                                            <input type="text" class="form-control" name="coefficient" th:value="${ec.coefficient}"/>
+                                        </div>
+                                    </div>
+                                    <!--modal Footer-->
+                                    <div class="modal-footer" >
+                                        <div class="row">
+                                            <div class="col-lg-3  col-md-3 col-sm-3 col-xs-4">
+                                                <button type="submit" class="btn btn-info" >Modifier</button>
+                                            </div>
+                                            <div class="col-lg-offset-5 col-lg-3 col-md-offset-5 col-md-3 col-sm-offset-5 col-sm-3 col-xs-8">
+                                                <button type="button" class="btn btn-default " data-dismiss="modal">Annuler</button>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </form>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <!-- Fin popup modifier un Etudiant -->
+
+                <!-- Debut popup supprimer un Etudiant -->
+                <div data-dismiss="modal">
+                    <div class="modal fade" th:attr="id='form_Supprimer_Etudiant'+${ec.id}">
+                        <div class="modal-dialog" >
+                            <div class="modal-content panel-danger" >
+                                <!--modal Header-->
+                                <div class="modal-header panel-heading" >
+                                    <button type="button" class="close" data-dismiss="modal">x</button>
+                                    <h4 class="modal-title" style="text-align: center">Supprimer EC</h4>
+                                </div>
+                                <!--modal Body-->
+                                <form th:action="@{/UE/supprimerEC}" method="post">
+                                    <div class="modal-body" >
+                                        <input type="hidden" name="idUE" th:value="${ue.id}">
+                                        <div style="display: none">
+                                            <input name="id" th:value="${ec.id}" />
+                                        </div>
+                                        <div class="form-group">
+                                            <label >Code</label> :
+                                            <span th:text="${ec.code}"/> </span>
+                                        </div>
+                                        <div class="form-group">
+                                            <label >Libelle</label> :
+                                            <span th:text="${ec.intitule}"/> </span>
+                                        </div>
+                                        <div class="form-group">
+                                            <label >CM</label> :
+                                            <span th:text="${ec.CM}"/> </span>
+                                        </div>
+                                        <div class="form-group">
+                                            <label >TD</label> :
+                                            <span th:text="${ec.TD}"/> </span>
+                                        </div>
+                                        <div class="form-group">
+                                            <label >TP</label> :
+                                            <span th:text="${ec.TP}"/> </span>
+                                        </div>
+                                        <div class="form-group">
+                                            <label >Coefficient</label> :
+                                            <span th:text="${ec.coefficient}"/> </span>
+                                        </div>
+                                    </div>
+                                    <!--modal Footer-->
+                                    <div class="modal-footer" >
+                                        <div class="row">
+                                            <div class="col-lg-3  col-md-3 col-sm-3 col-xs-4">
+                                                <button type="submit" class="btn btn-danger">Supprimer</button>
+                                            </div>
+                                            <div class="col-lg-offset-5 col-lg-3 col-md-offset-5 col-md-3 col-sm-offset-5 col-sm-3 col-xs-8">
+                                                <button type="button" class="btn btn-default " data-dismiss="modal">Annuler</button>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </form>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <!-- Fin popup supprimer un Etudiant -->
+
+
+            </tr>
+            </tbody>
+        </table>
+    </div>
+    <!-- Fin lister tout les Etudiants -->
+
+</div>
+
+<script>
+    $(document).ready(function() {
+        var table = $("#table_Etudiant").DataTable();
+
+        // Filtrage en temps réel basé sur la valeur du champ de recherche
+        $('#searchInput').on('keyup', function() {
+            table.search(this.value).draw();
+        });
+    });
+</script>
+
+</body>
+</html>

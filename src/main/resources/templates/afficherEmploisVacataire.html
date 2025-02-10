@@ -1,0 +1,222 @@
+<!DOCTYPE html>
+<html lang="fr" xmlns:th="http://www.thymeleaf.org">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Emploi du Temps</title>
+
+  <!-- Bootstrap CSS -->
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+  <link rel="stylesheet" href="../static/css/bootstrap.css" th:href="@{/css/bootstrap.css}"/>
+
+  <style>
+    .navbar {
+      background-color: #f8f9fa;
+    }
+    .timetable-cell {
+      min-width: 120px;
+      height: 100px;
+      padding: 5px;
+      vertical-align: top;
+    }
+    .course-block {
+      font-size: 0.8rem;
+      padding: 5px;
+      border-radius: 4px;
+      background-color: #e3f2fd;
+      border-left: 2px solid transparent;
+    }
+    .border-cm { border-left: 4px solid #66bb6a; }
+    .border-td { border-left: 4px solid #ffeb3b; }
+    .border-tp { border-left: 4px solid #ff9800; }
+    .day-column {
+      width: 100px;
+      font-weight: bold;
+      background-color: #f1f1f1;
+    }
+    .table-responsive {
+      margin: 10px;
+    }
+    /* Conteneur principal du menu */
+.nav-menu {
+  list-style: none; /* Supprime les puces */
+  margin: 0;
+  padding: 0;
+  display: flex;
+  justify-content: flex-end; /* Aligne le contenu à droite */
+  align-items: center;
+  background-color: #f8f9fa; /* Couleur de fond */
+  padding: 10px; /* Espacement interne */
+}
+
+/* Éléments du menu */
+.nav-item {
+  position: relative; /* Pour positionner le dropdown */
+}
+
+/* Lien du menu */
+.nav-link {
+  text-decoration: none; /* Supprime le soulignement */
+  color: #333; /* Couleur du texte */
+  padding: 8px 16px; /* Espacement interne */
+  display: block;
+}
+
+/* Menu déroulant */
+.dropdown-menu {
+  display: none; /* Masqué par défaut */
+  position: absolute;
+  right: 0; /* Aligne le dropdown à droite */
+  top: 100%; /* Positionne sous le lien parent */
+  background-color: white;
+  border: 1px solid #ddd;
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  min-width: 160px; /* Largeur minimale */
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1); /* Ombre */
+}
+
+/* Éléments du dropdown */
+.dropdown-item {
+  padding: 8px 16px;
+  text-decoration: none;
+  color: #333;
+  display: block;
+}
+
+/* Changement de couleur au survol */
+.dropdown-item:hover {
+  background-color: #f1f1f1;
+}
+
+/* Afficher le dropdown au survol */
+.nav-item:hover .dropdown-menu {
+  display: block;
+}
+  </style>
+</head>
+
+<body>
+<header>
+  <nav class="navbar navbar-expand-lg navbar-light">
+    <div class="container-fluid">
+      <a class="navbar-brand" th:href="@{/Vacataire/Acceuil}">Accueil</a>
+      <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav" aria-controls="navbarNav" aria-expanded="false" aria-label="Toggle navigation">
+        <span class="navbar-toggler-icon"></span>
+      </button>
+
+      <div class="collapse navbar-collapse justify-content-between" id="navbarNav">
+        <!-- Menu à gauche -->
+        <ul class="navbar-nav">
+          <li class="nav-item">
+            <a class="nav-link" th:href="@{/Vacataire/Emplois}">Emploi du Temps</a>
+          </li>
+          <li class="nav-item">
+            <a class="nav-link" href="#">Cours</a>
+          </li>
+        </ul>
+
+        <!-- Menu aligné à droite -->
+        <ul class="nav-menu">
+          <li class="nav-item dropdown">
+            <a class="nav-link dropdown-toggle" href="#" id="navbarDropdown" role="button">
+              <span th:text="${prenom + '. ' + nom}">Utilisateur</span>
+            </a>
+            <ul class="dropdown-menu" aria-labelledby="navbarDropdown">
+              <li><a class="dropdown-item" th:href="@{/profil}">Profil</a></li>
+              <li><a class="dropdown-item" th:href="@{/logout}">Déconnexion</a></li>
+            </ul>
+          </li>
+        </ul>
+      </div>
+    </div>
+  </nav>
+</header>
+<div class="container-fluid mt-4">
+  <h2 id="pdf-title" class="text-center text-success mb-4">Emploi du temps</h2>
+
+  <!-- Bouton pour télécharger le PDF -->
+  <div class="text-center mb-4">
+    <button id="download-pdf" class="btn btn-primary">Télécharger l'Emploi du Temps</button>
+  </div>
+
+  <div class="table-responsive">
+    <table id="timetable" class="table table-bordered">
+      <thead>
+      <tr>
+        <th>Jour</th>
+        <th th:each="hour : ${#numbers.sequence(8, 19)}" th:text="|${hour}:00 - ${hour + 1}:00|"></th>
+      </tr>
+      </thead>
+      <tbody>
+      <tr th:each="jour : ${jours}">
+        <td class="day-column" th:text="${jour}"></td>
+
+        <th:block th:with="usedHours=${new java.util.HashSet()}">
+          <th:block th:each="hour : ${#numbers.sequence(8, 19)}">
+            <td class="timetable-cell"
+                th:each="seance : ${seances}"
+                th:if="${seance.jour == jour && seance.heureDebut.hour == hour && !usedHours.contains(hour)}"
+                th:attr="colspan=${seance.heureFin.hour - seance.heureDebut.hour}">
+
+              <th:block th:with="ignore=${usedHours.addAll(#numbers.sequence(seance.heureDebut.hour, seance.heureFin.hour - 1))}"></th:block>
+
+              <div class="course-block"
+                   th:classappend="${seance.enseignement.type == 'CM' ? 'border-cm' :
+                                                  seance.enseignement.type == 'TD' ? 'border-td' :
+                                                  seance.enseignement.type == 'TP' ? 'border-tp' : ''}">
+                <div class="fw-bold" th:text="${'Matière:'+seance.enseignement.ec.intitule}"></div>
+                <div th:text="${'Professeur:'+seance.enseignant.prenom + ' ' + seance.enseignant.nom}"></div>
+                <div class="text-muted" th:text="${'Salle:'+seance.salle.batiment.nom + ' ' + seance.salle.numero}"></div>
+                <div class="small" >
+                  <span th:text="${'Semestre ' + seance.enseignement.maquette.semestre}"></span>
+                  <span th:text="${'Type ' + seance.enseignement.type}" style="color:red;"></span>
+                </div>
+              </div>
+            </td>
+
+            <td class="timetable-cell" th:unless="${usedHours.contains(hour)}"></td>
+          </th:block>
+        </th:block>
+      </tr>
+      </tbody>
+    </table>
+  </div>
+</div>
+
+<!-- Scripts -->
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf-autotable/3.5.18/jspdf.plugin.autotable.min.js"></script>
+<script>
+  // Fonction pour télécharger l'emploi du temps en PDF
+  document.getElementById('download-pdf').addEventListener('click', function() {
+      const { jsPDF } = window.jspdf;
+      const doc = new jsPDF();
+
+      // Récupérer le titre de l'h2
+      const title = document.getElementById('pdf-title').innerText;
+
+      // Ajouter le titre dans le PDF
+      doc.text(title, 10, 10);  // Position du titre (X: 10, Y: 10)
+
+      // Utiliser autoTable pour ajouter le tableau et ajuster la largeur des colonnes
+      doc.autoTable({
+          html: '#timetable',
+          startY: 20,  // Commence à une certaine hauteur pour éviter de couper l'en-tête
+          margin: { top: 20, left: 10, right: 10 },
+          columnStyles: {
+              0: { cellWidth: 'auto' }, // Colonne de jour
+              1: { cellWidth: 'auto' }, // Colonnes horaires
+          },
+          bodyStyles: { fontSize: 8 },  // Réduit la taille de la police pour adapter à la page
+          styles: { font: 'helvetica' }, // Utilisation de la police Helvetica pour une meilleure lisibilité
+          theme: 'grid',  // Style de grille
+      });
+
+      // Téléchargement du PDF
+      doc.save('emploi_du_temps.pdf');
+  });
+</script>
+</body>
+</html>

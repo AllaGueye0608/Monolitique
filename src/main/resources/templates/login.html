@@ -1,0 +1,95 @@
+<!DOCTYPE html>
+<html lang="fr" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Authentification</title>
+    <!-- Liens vers les fichiers CSS -->
+    <link rel="stylesheet" href="../static/css/bootstrap.css" th:href="@{/css/bootstrap.css}"/>
+    <link rel="stylesheet" href="../static/css/buttons.dataTables.min.css" th:href="@{/css/buttons.dataTables.min.css}"/>
+    <link rel="stylesheet" href="../static/css/jquery.dataTables.min.css" th:href="@{/css/jquery.dataTables.min.css}"/>
+    <!-- Liens vers les fichiers JavaScript -->
+    <script src="../static/js/jquery-3.7.0.js" th:src="@{/js/jquery-3.7.0.js}"></script>
+    <script src="../static/js/bootstrap.js" th:src="@{/js/bootstrap.js}"></script>
+    <script src="../static/js/dataTables.buttons.min.js" th:src="@{/js/dataTables.buttons.min.js}"></script>
+    <script src="../static/js/jquery.dataTables.min.js" th:src="@{/js/jquery.dataTables.min.js}"></script>
+
+    <!-- Style personnalisé -->
+    <style>
+        body {
+            background-color: #f8f9fa;
+            display: flex;               /* Active Flexbox */
+            justify-content: center;     /* Centre horizontalement */
+            align-items: center;         /* Centre verticalement */
+            height: 100vh;               /* Occupe toute la hauteur de l'écran */
+            margin: 0;                   /* Supprime les marges par défaut */
+        }
+
+        .auth-container {
+            max-width: 400px;
+            width: 100%;
+            padding: 20px;
+            background: #fff;
+            border-radius: 8px;
+            box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+        }
+
+        .auth-container h1 {
+            text-align: center;
+            margin-bottom: 20px;
+            color: #333;
+        }
+
+        .form-group {
+            margin-bottom: 15px;
+        }
+
+        .form-control {
+            border-radius: 5px;
+            padding: 10px;
+        }
+
+        .btn-block {
+            width: 100%;
+        }
+
+        .auth-links {
+            margin-top: 15px;
+            text-align: center;
+        }
+
+        .auth-links a {
+            color: #007bff;
+            text-decoration: none;
+        }
+
+        .auth-links a:hover {
+            text-decoration: underline;
+        }
+    </style>
+</head>
+<body>
+
+<div class="auth-container">
+    <h1>Authentification</h1>
+    <!-- Formulaire de connexion -->
+    <form th:action="@{/login}" name="login" role="form" method="post">
+        <div class="form-group">
+            <input name="username" placeholder="Nom d'utilisateur" class="form-control" type="text" required/>
+        </div>
+        <div class="form-group">
+            <input name="password" placeholder="Mot de passe" class="form-control" type="password" required/>
+        </div>
+        <div class="form-group">
+            <button class="btn btn-primary btn-block" type="submit">Connexion</button>
+        </div>
+    </form>
+    <!-- Liens supplémentaires -->
+    <div class="auth-links">
+        <a th:href="@{/inscription}">Créer un compte</a> |
+        <a th:href="@{/mot-de-passe-oublie}">Mot de passe oublié ?</a>
+    </div>
+</div>
+
+</body>
+</html>
