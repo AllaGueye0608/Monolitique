@@ -22,9 +22,9 @@
             background-color: #f2f2f2;
             cursor: pointer;
         }
-        .red-background {
             background-color: red;
             color: white;
+        .red-background {
             font-weight: bold;
         }
         .highlight {
@@ -65,7 +65,7 @@
 
         <!-- Enseignant CM -->
         <td th:if="${not #lists.isEmpty(choixList)}">
-            <span th:each="seance : ${choixList}" th:if="${seance.enseignement != null and seance.enseignement.ec != null and seance.enseignement.ec.intitule == ec.intitule and seance.enseignement.type == 'CM'}">
+            <span th:each="seance : ${choixList}" th:if="${seance.enseignement != null and seance.enseignement.ec != null and seance.enseignement.ec.intitule == ec.intitule and seance.type == 'CM' && seance.isResponsable()}">
                 <span th:text="${seance.enseignant.prenom + ' ' + seance.enseignant.nom}"></span>
             </span>
         </td>
@@ -73,14 +73,14 @@
 
         <!-- Responsables TD -->
         <td th:if="${not #lists.isEmpty(choixList)}">
-            <span th:each="seance : ${choixList}" th:if="${seance.enseignement != null and seance.enseignement.ec != null and seance.enseignement.ec.intitule == ec.intitule and seance.enseignement.type == 'TD'}">
+            <span th:each="seance : ${choixList}" th:if="${seance.enseignement != null and seance.enseignement.ec != null and seance.enseignement.ec.intitule == ec.intitule and seance.type == 'TD'} && seance.isResponsable()">
                 <span th:text="${seance.enseignant.prenom + ' ' + seance.enseignant.nom}"></span>
             </span>
         </td>
 
         <!-- Responsables TP -->
         <td th:if="${not #lists.isEmpty(choixList)}">
-            <span th:each="seance : ${choixList}" th:if="${seance.enseignement != null and seance.enseignement.ec != null and seance.enseignement.ec.intitule == ec.intitule and seance.enseignement.type == 'TP'}">
+            <span th:each="seance : ${choixList}" th:if="${seance.enseignement != null and seance.enseignement.ec != null and seance.enseignement.ec.intitule == ec.intitule and seance.type == 'TP'} && seance.isResponsable()">
                 <span th:text="${seance.enseignant.prenom + ' ' + seance.enseignant.nom}"></span>
             </span>
         </td>

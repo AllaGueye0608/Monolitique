@@ -12,10 +12,7 @@ import java.util.Optional;
 
 @Repository
 public interface EnseignementRepository extends JpaRepository<Enseignement,Long> {
-    public Optional<Enseignement> findByEcIdAndType(Long ecId, String type);
-    Enseignement findByMaquetteAndUeAndEcAndType(Maquette maquette,UE ue, EC ec, String type);
-    List<Enseignement> findByMaquetteAndUe(Maquette maquette, UE ue);
-    List<Enseignement> findByUe(UE ue);
-    Enseignement findByMaquetteAndEcAndType(Maquette maquette,EC ec,String type);
+    public Optional<Enseignement> findByEcId(Long ecId);
     List<Enseignement> findByMaquette(Maquette maquette);
+    Enseignement findByMaquetteAndEc(Maquette maquette,EC ec);
 }

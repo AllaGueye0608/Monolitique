@@ -1,29 +1,29 @@
 package uasz.sn.GestionEnseignement.GestionDeEmploiDuTemps.model;
 
 import jakarta.persistence.*;
-import lombok.AllArgsConstructor;
 import lombok.Data;
-import lombok.NoArgsConstructor;
 import uasz.sn.GestionEnseignement.users.model.Enseignant;
 
 import java.time.LocalDate;
 
-@Entity
 @Data
-@AllArgsConstructor
-@NoArgsConstructor
+@Entity
 public class Choix {
+
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
+    private String type; // Type d'enseignement
+    private LocalDate dateChoix; // Date du choix
+
     @ManyToOne
-    @JoinColumn(name = "enseignant_id", nullable = false)
+    @JoinColumn(name = "enseignant_id")
     private Enseignant enseignant;
 
-    @OneToOne
-    @JoinColumn(name = "enseignement_id", nullable = false)
+    @ManyToOne
+    @JoinColumn(name = "enseignement_id")
     private Enseignement enseignement;
-
-    private LocalDate dateChoix;  // Date du choix
+    private boolean valide = false;
+    private boolean responsable=false;
 }

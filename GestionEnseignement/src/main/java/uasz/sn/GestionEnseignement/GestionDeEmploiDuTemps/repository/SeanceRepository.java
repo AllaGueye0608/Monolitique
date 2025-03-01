@@ -19,5 +19,9 @@ public interface SeanceRepository extends JpaRepository<Seance,Long> {
     @Query("SELECT s FROM Seance s WHERE s.jour = :jour AND s.salle = :salle")
     List<Seance> findByJourAndSalle(@Param("jour") String jour, @Param("salle") Salle salle);
     List<Seance> findByEnseignant(Enseignant enseignant);
+    List<Seance> findByEnseignementAndType(Enseignement enseignement,String type);
     List<Seance> findByEnseignement(Enseignement enseignement);
+
+    List<Seance> findByJourAndHeureDebutAndHeureFin(String jour,LocalTime heureDebut,LocalTime heureFin);
+    List<Seance> findByJourAndHeureDebutAndHeureFinAndEnseignementAndType(String jour,LocalTime heureDebut,LocalTime heureFin,Enseignement enseignement,String type);
 }

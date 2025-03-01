@@ -142,22 +142,13 @@ public class UEController {
                 return "redirect:/UE?error=aucune_maquette_pour_ue";
             }
 
-            List<String> types = new ArrayList<>();
-            types.add("CM");
-            types.add("TD");
-            types.add("TP");
-
             for (Maquette maquette : ue.getMaquettes()) {
                 for (EC ec : ue.getEcList()) {
-                    for (String type : types) {
-                        if (!enseignementService.exists(maquette, ue, ec, type)) {
+                        if (!enseignementService.exists(maquette, ec)) {
                             Enseignement enseignement = new Enseignement();
                             enseignement.setMaquette(maquette);
-                            enseignement.setUe(ue);
                             enseignement.setEc(ec);
-                            enseignement.setType(type);
                             enseignementService.save(enseignement);
-                        }
                     }
                 }
             }
@@ -204,18 +195,12 @@ public class UEController {
             ec.setUe(ue);;
             EC ec1 = ecService.create(ec);
             if(ec1 != null && ec1.getUe() != null &&  ec1.getUe().getMaquettes() != null) {
-                List<String> types = new ArrayList<>();
-                types.add("TP");types.add("TD");types.add("CM");
                 for(Maquette maquette : ec1.getUe().getMaquettes()){
-                    for(String type : types){
-                        if (!enseignementService.exists(maquette, ec1.getUe(), ec1, type)) {
+                        if (!enseignementService.exists(maquette,  ec1)) {
                             Enseignement enseignement = new Enseignement();
                             enseignement.setMaquette(maquette);
-                            enseignement.setUe(ec1.getUe());
                             enseignement.setEc(ec);
-                            enseignement.setType(type);
                             enseignementService.save(enseignement);
-                        }
                     }
                 }
             }

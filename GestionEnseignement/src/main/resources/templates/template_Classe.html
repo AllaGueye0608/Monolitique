@@ -114,14 +114,17 @@
             <tr>
                 <th>Nom</th>
                 <th>Niveau</th>
+                <th>Effectif</th>
+                <th>Nombre de Groupes</th>
                 <th>Actions</th>
-                <th>Détails</th>
             </tr>
             </thead>
             <tbody>
             <tr th:each="classe : ${classes}">
                 <td th:text="${classe.formation.intitule}"></td>
                 <td th:text="${classe.niveau}"></td>
+                <td th:text="${classe.effectif}"></td>
+                <td th:text="${classe.nombreGroupe}"></td>
                 <td>
                     <!-- Bouton Modifier -->
                     <button class="btn btn-info btn-sm" data-toggle="modal"
@@ -140,12 +143,6 @@
                     <button th:if="${classe.isArchive()} == true" class="btn btn-primary btn-xs" data-toggle="modal" th:attr="data-target='#form_Archiver_Permanent'+${classe.id}">
                         Desarchiver
                     </button>
-                </td>
-                <td>
-                    <form th:action="@{/Classe/voirDetail}" method="get">
-                        <input type="hidden" name="id" th:value="${classe.id}">
-                        <input type="submit" value="Voir" class="btn btn-primary btn-sm">
-                    </form>
                 </td>
                 <!-- Modale Modifier Classe -->
                 <div class="modal fade" th:attr="id='modifierClasse_' + ${classe.id}" tabindex="-1" role="dialog" aria-labelledby="modifierClasseLabel">
@@ -173,6 +170,14 @@
                                             <option value="4">4</option>
                                             <option value="5">5</option>
                                         </select>
+                                    </div>
+                                    <div class="form-group">
+                                        <label for="effectif">Effectif</label>
+                                        <input type="number" id="effectif" name="effectif" th:value="${classe.effectif}" class="form-control">
+                                    </div>
+                                    <div class="form-group">
+                                        <label for="nbGroupe">Nombre de groupes</label>
+                                        <input type="number" id="nbGroupe" name="nombreGroupe" th:value="${classe.nombreGroupe}" class="form-control">
                                     </div>
                                     <button type="submit" class="btn btn-primary">Enregistrer</button>
                                 </form>
@@ -271,6 +276,15 @@
                                 <option value="4">4</option>
                                 <option value="5">5</option>
                             </select>
+                        </div>
+
+                        <div class="form-group">
+                            <label for="effectif1">Effectif</label>
+                            <input type="number" id="effectif1" name="effectif" class="form-control" required>
+                        </div>
+                        <div class="form-group">
+                            <label for="nbGroupe1">Nombre de groupes</label>
+                            <input type="number" id="nbGroupe1" name="nombreGroupe" class="form-control" required>
                         </div>
                     </div>
                     <div class="modal-footer">

@@ -1,9 +1,7 @@
 package uasz.sn.GestionEnseignement.GestionDesMaquettes.GestionMaquette.model;
 
 import jakarta.persistence.*;
-import lombok.AllArgsConstructor;
-import lombok.Data;
-import lombok.NoArgsConstructor;
+import lombok.*;
 import uasz.sn.GestionEnseignement.GestionDeEmploiDuTemps.model.Enseignement;
 import uasz.sn.GestionEnseignement.GestionDesMaquettes.GestionClasse.model.Classe;
 import uasz.sn.GestionEnseignement.GestionDesMaquettes.GestionDesUE.model.UE;

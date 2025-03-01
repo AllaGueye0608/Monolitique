@@ -67,15 +67,15 @@
                             <th:block th:with="ignore=${usedHours.addAll(#numbers.sequence(seance.heureDebut.hour, seance.heureFin.hour - 1))}"></th:block>
 
                             <div class="course-block"
-                                 th:classappend="${seance.enseignement.type == 'CM' ? 'border-cm' :
-                                                  seance.enseignement.type == 'TD' ? 'border-td' :
-                                                  seance.enseignement.type == 'TP' ? 'border-tp' : ''}">
+                                 th:classappend="${seance.type == 'CM' ? 'border-cm' :
+                                                  seance.type == 'TD' ? 'border-td' :
+                                                  seance.type == 'TP' ? 'border-tp' : ''}">
                                 <div class="fw-bold" th:text="${'Matière:'+seance.enseignement.ec.intitule}"></div>
                                 <div th:text="${'Professeur:'+seance.enseignant.prenom + ' ' + seance.enseignant.nom}"></div>
                                 <div class="text-muted" th:text="${'Salle:'+seance.salle.batiment.nom + ' ' + seance.salle.numero}"></div>
                                 <div class="small" >
                                     <span th:text="${'Semestre ' + seance.enseignement.maquette.semestre}"></span>
-                                    <span th:text="${'Type ' + seance.enseignement.type}" style="color:red;"></span>
+                                    <span th:text="${'Type ' + seance.type}" style="color:red;"></span>
                                 </div>
                             </div>
                         </td>

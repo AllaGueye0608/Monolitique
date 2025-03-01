@@ -17,7 +17,11 @@ import uasz.sn.GestionEnseignement.GestionDesMaquettes.GestionDesEC.model.EC;
 import uasz.sn.GestionEnseignement.GestionDesMaquettes.GestionDesEC.service.ECService;
 import uasz.sn.GestionEnseignement.GestionDesMaquettes.GestionMaquette.model.Maquette;
 import uasz.sn.GestionEnseignement.GestionDesMaquettes.GestionMaquette.service.MaquetteService;
+import uasz.sn.GestionEnseignement.authentification.model.User;
+import uasz.sn.GestionEnseignement.authentification.service.UserService;
+import uasz.sn.GestionEnseignement.users.model.Permanent;
 
+import java.security.Principal;
 import java.time.LocalTime;
 import java.util.ArrayList;
 import java.util.List;
@@ -37,8 +41,14 @@ public class EmploiDuTempsController {
     @Autowired
     private ECService ecService;
 
+    @Autowired
+    private UserService userService;
     @GetMapping("/Emplois")
-    public String afficher(Model model){
+    public String afficher(Model model,Principal principal){
+
+        User permanent = userService.findByUsername(principal.getName());
+        model.addAttribute("nom",permanent.getNom());
+        model.addAttribute("prenom",permanent.getPrenom().charAt(0));
         List<Seance> seances = seanceService.findAll();
         List<Maquette> maquettes = new ArrayList<>();
         List<Choix> choixList = choixService.findAll();
@@ -56,13 +66,14 @@ public class EmploiDuTempsController {
     }
 
     @GetMapping("/Emplois/voirEmplois")
-    public String voirEmploi(Model model,Long idMaquette){
+    public String voirEmploi(Model model, Long idMaquette, Principal principal){
+
+        User permanent = userService.findByUsername(principal.getName());
+        model.addAttribute("nom",permanent.getNom());
+        model.addAttribute("prenom",permanent.getPrenom().charAt(0));
         Maquette maquette = maquetteService.findById(idMaquette);
         List<Seance> seances = new ArrayList<>();
         for(Seance seance : seanceService.findAll()){
-            if(seance.getEnseignement().getMaquette() == maquette){
-                seances.add(seance);
-            }
         }
         List<LocalTime> heures = new ArrayList<>();
 
@@ -87,16 +98,16 @@ public class EmploiDuTempsController {
         Maquette maquette = maquetteService.findById(idMaquette);
         Classe classe = maquette.getClasse();
         List<EC> ecs = new ArrayList<>();
-        List<Enseignement> enseignements = new ArrayList<>();
-        for(Enseignement enseignement : enseignementService.findAll()){
-            if(enseignement.getMaquette() == maquette){
-                enseignements.add(enseignement);
-                if(!ecs.contains(enseignement.getEc())){
-                    ecs.add(enseignement.getEc());
-                }
+        List<Enseignement> enseignements = enseignementService.findAll();
+        for(Enseignement enseignement : enseignements){
+            if(!enseignement.getMaquette().equals(maquette)){
+                enseignements.remove(enseignement);
+            }else {
+                ecs.add(enseignement.getEc());
             }
         }
-        System.out.println(ecs.size());
+
+        System.out.println(" La liste des choix n'est pas vide :"+choixService.findAll().size()+ " La liste des enseignements:"+enseignements.size()+" la liste des ecs:"+ecs.size());
         model.addAttribute("choixList",choixService.findAll());
         model.addAttribute("ecs",ecs);
         model.addAttribute("classe",classe);

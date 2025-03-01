@@ -87,11 +87,11 @@ public class SeanceController {
         // Récupérer les entités
         EC ec = ecService.findById(idEC);
         Maquette maquette = maquetteService.findById(idMaquette);
-        Enseignement enseignement = enseignementService.findByMaquetteAndEcAndType(maquette, ec, type);
+        Enseignement enseignement = enseignementService.findByMaquetteAndEc(maquette, ec);
         Enseignant enseignant = enseignantService.findById(idEnseignant);
         Salle salle1 = salleService.findById(salle);
 
-        // Validation des entrées
+        // Validation des entités
         if (ec == null || maquette == null || enseignement == null || enseignant == null || salle1 == null) {
             return "redirect:/Choix?error=donnees_invalides";
         }
@@ -101,40 +101,54 @@ public class SeanceController {
             return "redirect:/Choix?error=horaire_invalide";
         }
 
-        // Vérifier les conflits de salle
+        // Vérifier les conflits de salle (existe-t-il déjà une séance à cet horaire dans cette salle)
         if (seanceService.verifierSeance(jour, heureDebut, heureFin, salle1)) {
             return "redirect:/Choix?error=conflit_salle";
         }
 
-        // Vérifier les conflits d'enseignant
-        if (seanceService.findByEnseignementAndEnseignant(enseignement, enseignant) != null) {
-            return "redirect:/Choix?error=conflit_enseignant";
+        Choix choix = choixService.findByEnseignantAndEnseignementAndType(enseignant, enseignement, type);
+        if(choix == null){
+            List<Choix> choixList = choixService.findByEnseignementAndType(enseignement,type);
+            // Si aucun choix n'existe pour ce type, ou si ce n'est pas un CM
+            if (choixList == null || choixList.isEmpty()) {
+                // Création d'un nouveau choix
+                choix = new Choix();
+                choix.setEnseignement(enseignement);
+                choix.setEnseignant(enseignant);
+                choix.setType(type);
+                choix.setDateChoix(LocalDate.now());
+                choixService.create(choix);
+            } else if ("CM".equals(type) && choixList.size() == 1) {
+                // Si le type est "CM" et qu'un seul choix existe, on définit ce choix comme responsable
+                choix = new Choix();
+                choix.setEnseignement(enseignement);
+                choix.setEnseignant(enseignant);
+                choix.setType(type);
+                choix.setResponsable(true); // Responsable pour CM
+                choix.setDateChoix(LocalDate.now());
+                choixService.create(choix);
+            }
+        }
+        // Vérifier s'il existe déjà une séance pour ces horaires et cet enseignement/type
+        List<Seance> existingSeances = seanceService.findByJourAndHeureDebutAndHeureFinAndEnseignementAndType(jour, heureDebut, heureFin, enseignement, type);
+        Seance existingSeance = existingSeances.isEmpty() ? null : existingSeances.get(0);
+
+        if (existingSeance != null) {
+            // Si une séance du même type et enseignement existe déjà, autoriser l'ajout d'une autre
+            // Aucune action supplémentaire ici pour le cas où la séance existe déjà
+        } else {
+            // Si aucune séance similaire n'existe, vérifier les conflits d'enseignement pour ces horaires
+            List<Seance> conflictingSeances = seanceService.findByJourAndHeureDebutAndHeureFin(jour, heureDebut, heureFin);
+            if (!conflictingSeances.isEmpty()) {
+                Seance conflictingSeance = conflictingSeances.get(0);
+                // Si une autre séance existe avec des horaires similaires mais d'un autre enseignement, retour d'erreur
+                if (!conflictingSeance.getEnseignement().equals(enseignement) || !conflictingSeance.getType().equals(type)) {
+                    return "redirect:/Choix?error=conflit_enseignement";
+                }
+            }
         }
 
-        // Vérifier les conflits d'enseignement
-        if (seanceService.verifierSeanceEnseignement(jour, heureDebut, heureFin, enseignement)) {
-            return "redirect:/Choix?error=conflit_enseignement";
-        }
-
-        // Vérifier si l'enseignement est déjà choisi par un autre enseignant
-        Choix existingChoix = choixService.findByEnseignement(enseignement);
-        if (existingChoix != null && !existingChoix.getEnseignant().equals(enseignant)) {
-            return "redirect:/Choix?error=enseignement_deja_choisi";
-        }
-
-        // Créer ou récupérer le choix
-        Choix choix = choixService.findByEnseignantAndEnseignement(enseignant, enseignement);
-        if (choix == null) {
-            choix = new Choix();
-            choix.setDateChoix(LocalDate.now());
-            choix.setEnseignant(enseignant);
-            choix.setEnseignement(enseignement);
-            choixService.create(choix);
-            enseignement.setChoix(choix);
-            enseignementService.save(enseignement);
-        }
-
-        // Créer la séance
+        // Créer la nouvelle séance
         Seance seance = new Seance();
         seance.setJour(jour);
         seance.setSalle(salle1);
@@ -143,23 +157,78 @@ public class SeanceController {
         seance.setHeureFin(heureFin);
         seance.setEnseignant(enseignant);
         seance.setEnseignement(enseignement);
-        seanceService.create(seance);
 
-        return "redirect:/Choix?success=seance_ajoutee";
+        // Sauvegarder la nouvelle séance
+        Seance seance2 = seanceService.create(seance);
+        if (seance2 != null) {
+            return "redirect:/Choix?success=seance_ajoutee";
+        }
+
+        return "redirect:/Choix?error=seance_nonAjoutee";
     }
 
+
+
+
+    @PostMapping("/Choix/responsabiliser")
+    public String responsabiliser(Long id){
+        Choix choix = choixService.findById(id);
+        List<Choix> choixList = choixService.findByEnseignementAndType(choix.getEnseignement(),choix.getType());
+
+        if(choix.isResponsable()){
+            choix.setResponsable(false);
+            choixService.update(choix);
+        }else{
+            for(Choix choix1 : choixList){
+                if(choix1.isResponsable()){
+                    return "redirect:/Choix?message=cet enseignement a déjé un responsable";
+                }
+            }
+            choix.setResponsable(true);
+            choixService.update(choix);
+        }
+        return "redirect:/Choix";
+    }
 
 
 
     @PostMapping("/Choix/modifierSeance")
     public String modifierSeance(Long idSeance ,String jour, LocalTime heureDebut,LocalTime heureFin,Long salle){
         Seance seance = seanceService.findById(idSeance);
+        Enseignement enseignement = seance.getEnseignement();
         Salle salle1 = salleService.findById(salle);
         if(!seance.getJour().equals(jour)){
             if( (heureDebut.getHour()*60 + heureDebut.getMinute()) >= (heureFin.getHour()*60 + heureFin.getMinute()) || seanceService.verifierSeance(jour,heureDebut,heureFin,salle1) == true){
                 return "redirect:/Choix";
             }
         }
+
+
+
+        // Vérifier les conflits de salle (existe-t-il déjà une séance à cet horaire dans cette salle)
+        if (seanceService.verifierSeance(jour, heureDebut, heureFin, salle1)) {
+            return "redirect:/Choix?error=conflit_salle";
+        }
+
+        // Vérifier s'il existe déjà une séance pour ces horaires et cet enseignement/type
+        List<Seance> existingSeances = seanceService.findByJourAndHeureDebutAndHeureFinAndEnseignementAndType(jour, heureDebut, heureFin, enseignement, seance.getType());
+        Seance existingSeance = existingSeances.isEmpty() ? null : existingSeances.get(0);
+
+        if (existingSeance != null) {
+            // Si une séance du même type et enseignement existe déjà, autoriser l'ajout d'une autre
+            // Aucune action supplémentaire ici pour le cas où la séance existe déjà
+        } else {
+            // Si aucune séance similaire n'existe, vérifier les conflits d'enseignement pour ces horaires
+            List<Seance> conflictingSeances = seanceService.findByJourAndHeureDebutAndHeureFin(jour, heureDebut, heureFin);
+            if (!conflictingSeances.isEmpty()) {
+                Seance conflictingSeance = conflictingSeances.get(0);
+                // Si une autre séance existe avec des horaires similaires mais d'un autre enseignement, retour d'erreur
+                if (!conflictingSeance.getEnseignement().equals(enseignement) || !conflictingSeance.getType().equals(seance.getType())) {
+                    return "redirect:/Choix?error=conflit_enseignement";
+                }
+            }
+        }
+
 
         seance.setJour(jour);
         seance.setSalle(salle1);seance.setHeureDebut(heureDebut);seance.setHeureFin(heureFin);
@@ -171,90 +240,72 @@ public class SeanceController {
     public String supprimerSeance(@RequestParam("id") Long id) {
         Seance seance = seanceService.findById(id);
         Enseignement enseignement = seance.getEnseignement();
-        enseignement.setSeance(null);
+        enseignement.getSeances().remove(seance);
         Enseignant enseignant = seance.getEnseignant();
         enseignementService.save(enseignement);
         seanceService.delete(seance);
         return "redirect:/Choix";
     }
-
     @PostMapping("/Choix/ajouterChoix")
     public String ajouter(
             Long idEnseignant, // ID de l'enseignant
             Long idEnseignement, // ID de l'enseignement
             String[] types // Types sélectionnés (CM, TD, TP)
     ) {
+        // Vérification si l'ID de l'enseignant est null
         if (idEnseignant == null) {
             System.out.println("enseignant null");
             return "redirect:/Choix?error=enseignant_manquant";
         }
 
+        // Vérification si l'ID de l'enseignement est null
         if (idEnseignement == null) {
             System.out.println("enseignement null");
             return "redirect:/Choix?error=enseignement_manquant";
         }
 
+        // Vérification si les types sélectionnés sont null ou vides
         if (types == null || types.length == 0) {
             System.out.println("types null");
-
             return "redirect:/Choix?error=types_manquants";
         }
 
-        // Récupérer l'enseignant et l'enseignement
+        // Récupérer l'enseignant et l'enseignement à partir de leur ID
         Enseignant enseignant = enseignantService.findById(idEnseignant);
         Enseignement enseignement = enseignementService.findById(idEnseignement);
 
-        // Validation des entrées
-        if (enseignant == null || enseignement == null || types == null || types.length == 0) {
+        // Validation des entrées (enseignant et enseignement doivent exister)
+        if (enseignant == null || enseignement == null) {
             return "redirect:/ChefDepartement/Enseignant?error=donnees_invalides";
         }
 
-        // Récupérer la maquette de l'enseignement
-        Maquette maquette = enseignement.getMaquette();
-        if (maquette == null) {
-            return "redirect:/Choix?error=maquette_invalide";
-        }
-
-        // Récupérer tous les enseignements de la maquette
-        List<Enseignement> enseignements = enseignementService.findByMaquette(maquette);
-
-        // Date du choix
-        LocalDate localDate = LocalDate.now();
-
-        // Parcourir les types sélectionnés
+        // Parcours des types (CM, TD, TP) sélectionnés
         for (String type : types) {
-            // Parcourir les enseignements de la maquette
-            for (Enseignement enseignement1 : enseignements) {
-                // Vérifier si l'enseignement correspond au type et à l'EC
-                if (enseignement1.getEc().equals(enseignement.getEc())
-                        && enseignement1.getType().equals(type)
-                        && enseignement1.getChoix() == null) {
+            // Chercher s'il y a déjà un choix existant pour ce type d'enseignement
+            List<Choix> choixList = choixService.findByEnseignementAndType(enseignement, type);
 
-                    // Vérifier si un choix existe déjà pour cet enseignant et cet enseignement
-                    Choix existingChoix = choixService.findByEnseignantAndEnseignement(enseignant, enseignement1);
-                    if (existingChoix != null) {
-                        continue; // Passer au suivant si un choix existe déjà
-                    }
-
-                    // Créer un nouveau choix
-                    Choix choix = new Choix();
-                    choix.setEnseignant(enseignant);
-                    choix.setEnseignement(enseignement1);
-                    choix.setDateChoix(localDate);
-
-                    // Sauvegarder le choix
-                    Choix choix1 = choixService.create(choix);
-                    if(choix1 != null){
-                        enseignement1.setChoix(choix);
-                        enseignementService.save(enseignement1);
-                        enseignant.getChoixList().add(choix1);
-                        enseignantService.update(enseignant);
-                    }
-                    // Associer le choix à l'enseignement
-                }
+            // Si aucun choix n'existe pour ce type, ou si ce n'est pas un CM
+            if (choixList == null || choixList.isEmpty()) {
+                // Création d'un nouveau choix
+                Choix choix = new Choix();
+                choix.setEnseignement(enseignement);
+                choix.setEnseignant(enseignant);
+                choix.setType(type);
+                choix.setDateChoix(LocalDate.now());
+                choixService.create(choix);
+            } else if ("CM".equals(type) && choixList.size() == 1) {
+                // Si le type est "CM" et qu'un seul choix existe, on définit ce choix comme responsable
+                Choix choix = new Choix();
+                choix.setEnseignement(enseignement);
+                choix.setEnseignant(enseignant);
+                choix.setType(type);
+                choix.setResponsable(true); // Responsable pour CM
+                choix.setDateChoix(LocalDate.now());
+                choixService.create(choix);
             }
         }
 
+        // Redirection après ajout des choix avec succès
         return "redirect:/Choix?success=choix_ajoutes";
     }
 
@@ -266,56 +317,39 @@ public class SeanceController {
             @RequestParam Long idEnseignement,
             @RequestParam String type
     ) {
+        // Récupérer les entités depuis la base de données
         Choix choix = choixService.findById(idChoix);
         Enseignant enseignant = enseignantService.findById(idEnseignant);
         Enseignement enseignement = enseignementService.findById(idEnseignement);
 
-        if (choix == null || enseignant == null || enseignement == null || type == null) {
-            return "redirect:/Choix?error=donnees_invalides";
+        // Valider les entités
+        if (choix == null || enseignant == null || enseignement == null) {
+            return "redirect:/Choix?error=donnees_invalides"; // Rediriger si une entité est introuvable
+        }
+        if(enseignant != choix.getEnseignant()){
+            choix.setEnseignant(enseignant);
+        }
+        if(enseignement != choix.getEnseignement()){
+            choix.setEnseignement(enseignement);
+        }
+        if(!choix.getType().equals(type)){
+            choix.setType(type);
+            choix.setDateChoix(LocalDate.now());
         }
 
-        for (Enseignement enseignement1 : enseignementService.findAll()) {
-            if (enseignement1.getEc().equals(enseignement.getEc()) &&
-                    enseignement1.getMaquette().equals(enseignement.getMaquette()) &&
-                    enseignement1.getType().equals(type)) {
+        choixService.update(choix);
 
-                // Vérifier si cet enseignement est déjà choisi
-                if (!choixService.estChoisi(enseignement1)) {
-                    choix.setEnseignant(enseignant);
-                    choix.setEnseignement(enseignement1);
-                    choix.setDateChoix(LocalDate.now());
-
-                    choixService.update(choix);
-                    enseignementService.save(enseignement1);
-                    break;
-                } else {
-                    return "redirect:/Choix?error=enseignement_deja_choisi";
-                }
-            }
-        }
-
+        // Rediriger avec un message de succès
         return "redirect:/Choix?success=choix_modifie";
     }
-
     @PostMapping("/Choix/supprimerChoix")
     public String supprimerChoix(Long id){
         Choix choix = choixService.findById(id);
-        for(Enseignement enseignement : enseignementService.findAll()){
-            if(enseignement.getChoix() == choix){
-                enseignement.setChoix(null);
-                enseignementService.save(enseignement);
-            }
-        }
-        for(Enseignant enseignant : enseignantService.findAll()){
-            if(enseignant.getChoixList().contains(choix)){
-                enseignant.getChoixList().remove(choix);
-                enseignantService.update(enseignant);
-            }
-        }
+        choixService.delete(choix);
         Seance seance = seanceService.findByEnseignementAndEnseignant(choix.getEnseignement(),choix.getEnseignant());
         if(seance != null){
             Enseignement enseignement = seance.getEnseignement();
-            enseignement.setSeance(null);
+            enseignement.getSeances().remove(seance);
             Enseignant enseignant = seance.getEnseignant();
             enseignementService.save(enseignement);
             seanceService.delete(seance);

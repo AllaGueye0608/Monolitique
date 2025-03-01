@@ -85,24 +85,13 @@ public class MaquetteController {
         }
         maquette.setUeList(ues);
         Maquette maquette1 = maquetteService.create(maquette);
-
-        // Ajout des enseignements pour chaque UE et EC
-        List<String> types = new ArrayList<>();
-        types.add("CM");
-        types.add("TD");
-        types.add("TP");
-
         if (maquette1 != null && !ues.isEmpty()) {
             for (UE ue : ues) {
                 for (EC ec : ue.getEcList()) {
-                    for (String type : types) {
                         Enseignement enseignement = new Enseignement();
                         enseignement.setMaquette(maquette1);
-                        enseignement.setUe(ue);
                         enseignement.setEc(ec);
-                        enseignement.setType(type);
                         enseignementService.save(enseignement);
-                    }
                 }
             }
         }
@@ -140,23 +129,13 @@ public class MaquetteController {
                     }
             }
             Maquette maquette1 = maquetteService.update(maquette);
-            // Ajout des enseignements pour chaque UE et EC
-            List<String> types = new ArrayList<>();
-            types.add("CM");
-            types.add("TD");
-            types.add("TP");
-
             if (maquette1 != null && !ues.isEmpty()) {
                 for (UE ue : ues) {
                     for (EC ec : ue.getEcList()) {
-                        for (String type : types) {
                             Enseignement enseignement = new Enseignement();
                             enseignement.setMaquette(maquette1);
-                            enseignement.setUe(ue);
                             enseignement.setEc(ec);
-                            enseignement.setType(type);
                             enseignementService.save(enseignement);
-                        }
                     }
                 }
             }
@@ -215,17 +194,10 @@ public class MaquetteController {
         if (savedUe.getEcList() != null && !savedUe.getEcList().isEmpty()) {
             List<String> types = List.of("CM", "TD", "TP");  // Types d'enseignements
             for (EC ec : savedUe.getEcList()) {
-                for (String type : types) {
-                    // Vérifier si l'enseignement existe déjà pour cette combinaison
-                    if (!enseignementService.exists(maquette, savedUe, ec, type)) {
                         Enseignement enseignement = new Enseignement();
                         enseignement.setMaquette(maquette);
-                        enseignement.setUe(savedUe);
                         enseignement.setEc(ec);
-                        enseignement.setType(type);
                         enseignementService.save(enseignement);  // Sauvegarder l'enseignement
-                    }
-                }
             }
         }
 
@@ -287,23 +259,13 @@ public class MaquetteController {
                 return "redirect:/UE?error=aucune_maquette_pour_ue";
             }
 
-            List<String> types = new ArrayList<>();
-            types.add("CM");
-            types.add("TD");
-            types.add("TP");
-
             for (Maquette maquette : ue.getMaquettes()) {
                 for (EC ec : ue.getEcList()) {
-                    for (String type : types) {
-                        if (!enseignementService.exists(maquette, ue, ec, type)) {
                             Enseignement enseignement = new Enseignement();
                             enseignement.setMaquette(maquette);
-                            enseignement.setUe(ue);
                             enseignement.setEc(ec);
-                            enseignement.setType(type);
                             enseignementService.save(enseignement);
-                        }
-                    }
+
                 }
             }
         }
@@ -326,7 +288,7 @@ public class MaquetteController {
         }
 
         // Supprimer les enseignements associés à cette UE et cette maquette
-        List<Enseignement> enseignements = enseignementService.findByMaquetteAndUe(maquette, ue);
+        List<Enseignement> enseignements = enseignementService.findByMaquette(maquette);
         for (Enseignement enseignement : enseignements) {
             enseignementService.delete(enseignement);  // Supprimer chaque enseignement
         }

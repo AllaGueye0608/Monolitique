@@ -20,12 +20,7 @@ public class SeanceService {
     private SeanceRepository seanceRepository;
 
     public Seance create(Seance seance){
-        Seance seanceExisting = seanceRepository.findByEnseignementAndEnseignant(seance.getEnseignement(),seance.getEnseignant());
-        if(seanceExisting != null){
-            return null;
-        }else {
             return seanceRepository.save(seance);
-        }
     }
 
     public Seance update(Seance seance){
@@ -50,6 +45,14 @@ public class SeanceService {
             }
         }
         return false;
+    }
+
+    public List<Seance> findByJourAndHeureDebutAndHeureFin(String jour,LocalTime heureDebut,LocalTime heureFin){
+        return seanceRepository.findByJourAndHeureDebutAndHeureFin(jour,heureDebut,heureFin);
+    }
+
+    public List<Seance> findByJourAndHeureDebutAndHeureFinAndEnseignementAndType(String jour,LocalTime heureDebut,LocalTime heureFin,Enseignement enseignement,String type){
+        return seanceRepository.findByJourAndHeureDebutAndHeureFinAndEnseignementAndType(jour, heureDebut, heureFin, enseignement, type);
     }
     public boolean verifierSeanceEnseignement(String jour, LocalTime heureDebut, LocalTime heureFin, Enseignement enseignement) {
         // Récupérer toutes les séances pour l'enseignement donné

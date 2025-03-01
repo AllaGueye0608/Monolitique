@@ -37,6 +37,4 @@ public class UE {
     @ManyToMany(mappedBy = "ueList")
     private List<Maquette> maquettes = new ArrayList<>();
 
-    @OneToMany(mappedBy = "ue", fetch = FetchType.LAZY, cascade = CascadeType.ALL, orphanRemoval = true)
-    private List<Enseignement> enseignements = new ArrayList<>();
 }

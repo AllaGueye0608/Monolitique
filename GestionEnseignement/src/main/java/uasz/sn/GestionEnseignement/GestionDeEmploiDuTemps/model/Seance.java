@@ -30,7 +30,7 @@ public class Seance {
     @JoinColumn(name = "enseignant_id", nullable = false)
     private Enseignant enseignant;
 
-    @OneToOne
+    @ManyToOne
     @JoinColumn(name = "enseignement_id", nullable = false)
     private Enseignement enseignement;
 }

@@ -59,10 +59,6 @@ public class UEService {
             ecService.delete(ec); // Mise à jour des EC pour éviter la contrainte d'intégrité
         }
 
-        // Suppression des enseignements liés à l'UE
-        List<Enseignement> enseignements = ue.getEnseignements();
-        enseignementRepository.deleteAll(enseignements);
-
         // Suppression des relations avec les maquettes
         List<Maquette> maquettes = ue.getMaquettes();
         for (Maquette maquette : maquettes) {

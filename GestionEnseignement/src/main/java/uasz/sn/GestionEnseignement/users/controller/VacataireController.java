@@ -7,8 +7,10 @@ import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
+import uasz.sn.GestionEnseignement.GestionDeEmploiDuTemps.model.Choix;
 import uasz.sn.GestionEnseignement.GestionDeEmploiDuTemps.model.Seance;
 import uasz.sn.GestionEnseignement.GestionDeEmploiDuTemps.repository.SeanceRepository;
+import uasz.sn.GestionEnseignement.GestionDeEmploiDuTemps.service.ChoixService;
 import uasz.sn.GestionEnseignement.authentification.model.Role;
 import uasz.sn.GestionEnseignement.authentification.model.User;
 import uasz.sn.GestionEnseignement.authentification.service.UserService;
@@ -34,6 +36,8 @@ public class VacataireController {
     private PasswordEncoder passwordEncoder;
     @Autowired
     private SeanceRepository seanceRepository;
+    @Autowired
+    private ChoixService choixService;
 
     @RequestMapping("/Vacataire/Acceuil")
     public String acceuilVacataire(Model model, Principal principal) {
@@ -100,4 +104,19 @@ public class VacataireController {
         return "redirect:/ChefDepartement/Enseignant";
     }
 
+    @GetMapping("/Vacataire/Cours")
+    public String voirCours(Model model,Principal principal){
+        User user = userService.findByUsername(principal.getName());
+        model.addAttribute("prenom",user.getPrenom());
+        model.addAttribute("nom",user.getNom());
+
+        List<Choix> choixList = choixService.findAll();
+        for(Choix c : choixList){
+            if(c.getEnseignant() != enseignantService.findById(user.getId())){
+                choixList.remove(c);
+            }
+        }
+        model.addAttribute("choixList",choixList);
+        return "template_coursVacataire";
+    }
 }

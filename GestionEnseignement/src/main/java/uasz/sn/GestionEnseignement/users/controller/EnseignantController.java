@@ -49,18 +49,7 @@ public class EnseignantController {
         List<Vacataire> vacataires = vacataireService.findAll();
         model.addAttribute("vacataires", vacataires);
 
-        List<Enseignement> enseignements = new ArrayList<>();
-        Set<String> uniqueCombination = new HashSet<>(); // Pour stocker les combinaisons uniques
-
-        for (Enseignement enseignement : enseignementService.findAll()) {
-            if (enseignement.getChoix() == null && enseignement.getEc() != null) {
-                String key = enseignement.getEc().getId() + "-" + enseignement.getMaquette().getId();
-                if (uniqueCombination.add(key)) { // Ajoute uniquement si la combinaison est nouvelle
-                    enseignements.add(enseignement);
-                }
-            }
-        }
-
+        List<Enseignement> enseignements = enseignementService.findAll();
         model.addAttribute("enseignements", enseignements);
 
         User user = userService.findByUsername(principal.getName());
@@ -104,46 +93,17 @@ public class EnseignantController {
             return "redirect:/ChefDepartement/Enseignant?error=donnees_invalides";
         }
 
-        // Récupérer la maquette de l'enseignement
-        Maquette maquette = enseignement.getMaquette();
-        if (maquette == null) {
-            return "redirect:/ChefDepartement/Enseignant?error=maquette_invalide";
-        }
-
-        // Récupérer tous les enseignements de la maquette
-        List<Enseignement> enseignements = enseignementService.findByMaquette(maquette);
-
-        // Date du choix
-        LocalDate localDate = LocalDate.now();
-
-        // Parcourir les types sélectionnés
-        for (String type : types) {
-            // Parcourir les enseignements de la maquette
-            for (Enseignement enseignement1 : enseignements) {
-                // Vérifier si l'enseignement correspond au type et à l'EC
-                if (enseignement1.getEc().equals(enseignement.getEc())
-                        && enseignement1.getType().equals(type)
-                        && enseignement1.getChoix() == null) {
-
-                    // Vérifier si un choix existe déjà pour cet enseignant et cet enseignement
-                    Choix existingChoix = choixService.findByEnseignantAndEnseignement(enseignant, enseignement1);
-                    if (existingChoix != null) {
-                        continue; // Passer au suivant si un choix existe déjà
+        for(String type : types){
+            if(choixService.findByEnseignantAndEnseignementAndType(enseignant,enseignement,type) == null){
+                if(choixService.findByEnseignementAndType(enseignement,type) != null){
+                    if(type.equals("CM")){
+                        return "redirect:/ChefDepartement/Enseignant?erreur=un enseignant est déja affecté pour faire ce CM";
                     }
-
-                    // Créer un nouveau choix
-                    Choix choix = new Choix();
-                    choix.setEnseignant(enseignant);
-                    choix.setEnseignement(enseignement1);
-                    choix.setDateChoix(localDate);
-
-                    // Sauvegarder le choix
-                    choixService.create(choix);
-
-                    // Associer le choix à l'enseignement
-                    enseignement1.setChoix(choix);
-                    enseignementService.save(enseignement1);
                 }
+                Choix choix = new Choix();
+                choix.setEnseignement(enseignement);choix.setEnseignant(enseignant);choix.setType(type);
+                choix.setDateChoix(LocalDate.now());
+                choixService.create(choix);
             }
         }
 

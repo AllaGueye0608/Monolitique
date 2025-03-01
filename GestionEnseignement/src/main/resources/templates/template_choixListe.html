@@ -132,7 +132,7 @@
                     <tr th:each="choix : ${choixList}">
                         <td th:text="${choix.enseignant.nom + ' ' + choix.enseignant.prenom}"></td>
                         <td th:text="${choix.enseignement.ec.intitule+'('+choix.enseignement.maquette.classe.formation.intitule+'-'+choix.enseignement.maquette.classe.niveau+')'}"></td>
-                        <td th:text="${choix.enseignement.type}"></td>
+                        <td th:text="${choix.type}"></td>
                         <td>
                             <!-- Bouton Modifier -->
                             <button class="btn btn-info btn-sm" data-toggle="modal" th:attr="data-target='#modifierChoixModal_' + ${choix.id}">
@@ -147,18 +147,71 @@
                             <button class="btn btn-warning"  data-toggle="modal" th:attr="data-target='#ajouterSeanceChoixModal_' + ${choix.id}">
                                 seance
                             </button>
+                            <button th:if="${choix.responsable == false}" class="btn btn-success" data-toggle="modal"
+                                    th:attr="data-target='#responsabiliserModal_' + ${choix.id}" type="button">
+                                Responsabiliser
+                            </button>
+                            <button th:if="${choix.responsable == true}" class="btn btn-danger" data-toggle="modal"
+                                    th:attr="data-target='#retirerResponsabiliteModal_' + ${choix.id}" type="button">
+                                Retirer
+                            </button>
+
                         </td>
+                        <div th:if="${choix.responsable == true}" th:each="choix : ${choixList}"
+                             th:id="'retirerResponsabiliteModal_' + ${choix.id}" class="modal fade" tabindex="-1" role="dialog">
+                            <div class="modal-dialog" role="document">
+                                <div class="modal-content">
+                                    <div class="modal-header">
+                                        <h5 class="modal-title">Confirmation</h5>
+                                        <button type="button" class="close" data-dismiss="modal">&times;</button>
+                                    </div>
+                                    <div class="modal-body">
+                                        <p>Êtes-vous sûr de vouloir retirer la responsabilité ?</p>
+                                    </div>
+                                    <div class="modal-footer">
+                                        <form th:action="@{/Choix/responsabiliser}" method="post">
+                                            <input type="hidden" th:name="id" th:value="${choix.id}" />
+                                            <button type="submit" class="btn btn-danger">Confirmer</button>
+                                        </form>
+                                        <button type="button" class="btn btn-secondary" data-dismiss="modal">Annuler</button>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Modal pour responsabiliser -->
+                        <div th:if="${choix.responsable == false}" th:each="choix : ${choixList}"
+                             th:id="'responsabiliserModal_' + ${choix.id}" class="modal fade" tabindex="-1" role="dialog">
+                            <div class="modal-dialog" role="document">
+                                <div class="modal-content">
+                                    <div class="modal-header">
+                                        <h5 class="modal-title">Confirmation</h5>
+                                        <button type="button" class="close" data-dismiss="modal">&times;</button>
+                                    </div>
+                                    <div class="modal-body">
+                                        <p>Voulez-vous vraiment responsabiliser ce professeur ?</p>
+                                    </div>
+                                    <div class="modal-footer">
+                                        <form th:action="@{/Choix/responsabiliser}" method="post">
+                                            <input type="hidden" th:name="id" th:value="${choix.id}" />
+                                            <button type="submit" class="btn btn-success">Confirmer</button>
+                                        </form>
+                                        <button type="button" class="btn btn-secondary" data-dismiss="modal">Annuler</button>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
 
 
                         <div class="modal fade" th:id="'ajouterSeanceChoixModal_'+${choix.id}" tabindex="-1" role="dialog" aria-labelledby="ajouterSeanceModalLabel1" aria-hidden="true" >
                             <div class="modal-dialog" role="document">
                                 <div class="modal-content">
                                     <div class="modal-header">
-                                        <h5 class="modal-title" id="ajouterSeanceModalLabel1">Ajouter une Séance</h5>
+                                        <h5 class="modal-title" id="ajouterSeanceModalLabel2">Ajouter une Séance</h5>
                                         <button type="button" class="close" data-dismiss="modal" aria-label="Close">
                                             <span aria-hidden="true">&times;</span>
-                                        </button>
                                     </div>
+                                        </button>
                                     <form th:action="@{/Choix/ajouterSeance}" method="post" >
                                         <div class="modal-body" th:if="${maquettes != null}">
                                             <!-- Sélection du professeur -->
@@ -183,8 +236,8 @@
                                             <!-- Sélection du type de matière -->
                                             <div class="form-group">
                                                 <label for="typeMatiere">Type de matière</label>
-                                                <input type="hidden" name="type" th:value="${choix.enseignement.type}">
-                                                <input class="form-control" type="text" th:value="${choix.enseignement.type}" readonly>
+                                                <input type="hidden" name="type" th:value="${choix.type}">
+                                                <input class="form-control" type="text" th:value="${choix.type}" readonly>
                                             </div>
 
                                             <!-- Sélection du jour -->
@@ -214,7 +267,8 @@
                                                 <select class="form-control" id="salle" name="salle" required>
                                                     <option value="" disabled>-- Sélectionner une salle --</option>
                                                     <option th:each="salle : ${salles}" th:value="${salle.id}" th:text="${salle.batiment.nom +''+salle.numero}"></option>
-                                                </select>                                </div>
+                                                </select>
+                                            </div>
                                         </div>
 
                                         <div class="modal-footer">
@@ -225,41 +279,6 @@
                                 </div>
                             </div>
                         </div>
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
                         <!-- Modal pour modifier un Choix -->
                         <div class="modal fade" th:id="'modifierChoixModal_' + ${choix.id}" tabindex="-1" role="dialog" aria-labelledby="modifierChoixModalLabel" aria-hidden="true">
                             <div class="modal-dialog" role="document">
@@ -279,8 +298,10 @@
                                                 <label for="enseignant">Enseignant</label>
                                                 <select class="form-control" id="enseignant1" name="idEnseignant" required>
                                                     <option value="" disabled>-- Sélectionner un enseignant --</option>
-                                                    <option th:each="prof : ${enseignants}" th:value="${prof.id}" th:text="${prof.nom + ' ' + prof.prenom}" th:selected="${choix.enseignant.id == prof.id}"></option>
-                                                </select>
+                                                    <option th:each="prof : ${enseignants}"
+                                                            th:value="${prof.id}"
+                                                            th:text="${prof.nom + ' ' + prof.prenom}"
+                                                            th:selected="${choix.enseignant.id == prof.id}"></option>                                                </select>
                                             </div>
 
                                             <!-- Sélection de l'enseignement -->
@@ -295,7 +316,7 @@
                                                 <label for="typeMatiere">Type de matière</label>
                                                 <select class="form-control" id="typeMatiere1" name="type" required>
                                                     <option value="" disabled selected>-- Sélectionner un type --</option>
-                                                    <option value="CM">Cours Magistral (CM)</option>
+                                                    <option value="CM" >Cours Magistral (CM)</option>
                                                     <option value="TD">Travaux Dirigés (TD)</option>
                                                     <option value="TP">Travaux Pratiques (TP)</option>
                                                 </select>
@@ -447,7 +468,7 @@
                             <tr th:each="seance : ${seances}">
                                 <td th:text="${seance.enseignant.nom + ' ' + seance.enseignant.prenom}"></td>
                                 <td th:text="${seance.enseignement.ec.intitule}"></td>
-                                <td th:text="${seance.enseignement.type}"></td>
+                                <td th:text="${seance.type}"></td>
                                 <td th:text="${seance.jour}"></td>
                                 <td th:text="${seance.heureDebut}"></td>
                                 <td th:text="${seance.heureFin}"></td>
@@ -502,7 +523,7 @@
                                                     <div class="form-group">
                                                         <label for="type">Type</label>
                                                         <input type="text" class="form-control" id="type" name="type"
-                                                               th:value="${seance.enseignement.type}"  readonly>
+                                                               th:value="${seance.type}"  readonly>
                                                     </div>
 
                                                     <!-- Sélection du jour -->

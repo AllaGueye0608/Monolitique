@@ -29,36 +29,21 @@ public class EnseignementService {
                 .orElseThrow(() -> new RuntimeException("Enseignement not found"));
     }
     public Enseignement save(Enseignement enseignement) {
-        // Vérification si un enseignement identique existe
-        Optional<Enseignement> enseignementExist = enseignementRepository
-                .findByEcIdAndType(enseignement.getEc().getId(), enseignement.getType());
-
-        if (enseignementExist.isPresent()) {
-            // L'enseignement existe déjà
-            return null; // ou vous pouvez renvoyer l'enseignement existant si besoin
-        }
-
-        // Si l'enseignement n'existe pas, on peut l'enregistrer
         return enseignementRepository.save(enseignement);
     }
-    public Enseignement findByEcAndType(Long id,String type){
-        return enseignementRepository.findByEcIdAndType(id,type).get();
+    public Enseignement findByEcAndType(Long id){
+        return enseignementRepository.findByEcId(id).get();
     }
 
-    public boolean exists(Maquette maquette, UE ue, EC ec, String type) {
+    public boolean exists(Maquette maquette,EC ec) {
         // Utilisation d'un repository pour vérifier si un enseignement existe avec les mêmes paramètres
-        Enseignement enseignement = enseignementRepository.findByMaquetteAndUeAndEcAndType(maquette,ue, ec, type);
+        Enseignement enseignement = enseignementRepository.findByMaquetteAndEc(maquette, ec);
         return enseignement != null;
     }
 
-    public  List<Enseignement> findByMaquetteAndUe(Maquette maquette, UE ue){
-        return enseignementRepository.findByMaquetteAndUe(maquette,ue);
-    }
-    public List<Enseignement> findByUe(UE ue) {
-        return enseignementRepository.findByUe(ue);
-    }
-    public Enseignement findByMaquetteAndEcAndType(Maquette maquette,EC ec , String type){
-        return enseignementRepository.findByMaquetteAndEcAndType(maquette,ec,type);
+
+    public Enseignement findByMaquetteAndEc(Maquette maquette,EC ec ){
+        return enseignementRepository.findByMaquetteAndEc(maquette,ec);
     }
     public void delete(Enseignement enseignement) {
         enseignementRepository.delete(enseignement);

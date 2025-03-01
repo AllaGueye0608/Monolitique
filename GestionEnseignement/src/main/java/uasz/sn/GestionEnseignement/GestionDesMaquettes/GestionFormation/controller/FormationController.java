@@ -60,19 +60,6 @@ public class FormationController {
         return "redirect:/Formation";
     }
 
-    @GetMapping("/Formation/voirDetail")
-    public String voirDeatil(Model model,Long idFormation,Principal principal){
-        User permanent = userService.findByUsername(principal.getName());
-        model.addAttribute("nom",permanent.getNom());
-        model.addAttribute("prenom",permanent.getPrenom().charAt(0));
-
-        Formation formation = formationService.findById(idFormation);
-        if(formation != null){
-            model.addAttribute("classes",formation.getClasses());
-            model.addAttribute("formation",formation);
-        }
-        return "template_Classe";
-    }
     @PostMapping("/Formation/ajouterClasse")
     public String ajouterClasse(Long idFormation, String nom,int niveau){
         Classe classe = new Classe();classe.setNiveau(niveau);

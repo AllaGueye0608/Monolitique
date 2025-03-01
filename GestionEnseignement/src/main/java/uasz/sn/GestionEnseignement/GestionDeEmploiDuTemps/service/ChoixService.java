@@ -16,9 +16,14 @@ public class ChoixService {
     @Autowired
     private ChoixRepository choixRepository;
 
-    public Choix findByEnseignantAndEnseignement(Enseignant enseignant, Enseignement enseignement){
-        return choixRepository.findByEnseignantAndEnseignement(enseignant,enseignement);
+    public Choix findByEnseignantAndEnseignementAndType(Enseignant enseignant, Enseignement enseignement,String type){
+        return choixRepository.findByEnseignantAndEnseignementAndType(enseignant,enseignement,type);
     }
+
+    public List<Choix> findByEnseignementAndType(Enseignement enseignement,String type){
+        return choixRepository.findByEnseignementAndType(enseignement,type);
+    }
+
 
     public Choix findByEnseignement(Enseignement enseignement){
         return choixRepository.findByEnseignement(enseignement);

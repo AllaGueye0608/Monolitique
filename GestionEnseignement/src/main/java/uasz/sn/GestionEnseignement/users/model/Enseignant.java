@@ -5,9 +5,11 @@ import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 import uasz.sn.GestionEnseignement.GestionDeEmploiDuTemps.model.Choix;
+import uasz.sn.GestionEnseignement.GestionDeEmploiDuTemps.model.Enseignement;
 import uasz.sn.GestionEnseignement.GestionDeEmploiDuTemps.model.Seance;
 import uasz.sn.GestionEnseignement.authentification.model.User;
 
+import java.util.ArrayList;
 import java.util.List;
 
 @Entity
@@ -22,6 +24,13 @@ public abstract class Enseignant extends User {
     @OneToMany(mappedBy = "enseignant", cascade = CascadeType.ALL, orphanRemoval = true)
     private List<Seance> seances;
 
-    @OneToMany(mappedBy = "enseignant", cascade = CascadeType.ALL, orphanRemoval = true)
-    private List<Choix> choixList; // Lié à la table de jointure Choix
+    // Relation ManyToMany avec l'entité Enseignement
+    @ManyToMany
+    @JoinTable(
+            name = "choix",
+            joinColumns = @JoinColumn(name = "enseignant_id"),
+            inverseJoinColumns = @JoinColumn(name = "enseignement_id")
+    )
+    private List<Enseignement> enseignements = new ArrayList<>();
+
 }
